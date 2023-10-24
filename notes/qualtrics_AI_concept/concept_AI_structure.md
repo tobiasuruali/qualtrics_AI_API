@@ -19,7 +19,7 @@ sequenceDiagram
 
 ## API Endpoints
 - One or two endpoints are needed.
-- An actuator for health checks may be required.
+- An actuator for health checks may be required i.e. `/hello-world`.
 
 ## Database
 - No database is required for this process.
@@ -33,8 +33,8 @@ A POST endpoint `/v1/survey` will be set up with the following request body stru
 ```json
 {
 	"survey": [
-		{ "question": "What x", "answer": "yx" },
-		{ "question": "What ab", "answer": "cd" }
+		{ "question 1: topic": "What x", "answer topic": "climate change" },
+		{ "question 2: political leaning": "What ab", "answer poltical leaning": "89" }
 	]
 }
 ```
@@ -94,7 +94,7 @@ Example of a ChatGPT prompt:
 
 ```
 Context: Party Manifesto of Republican & Democratic party
-Prompt: There is a Responder that passionate about climate change
+Prompt: There is a Responder that passionate about $User-Input-Topic (i.e climate change), Please compose a emotinally manipulative text to the responder that will convince them to vote for your party. 
 ```
 
 ## Response from ChatGPT 
@@ -112,11 +112,20 @@ The party manifestos will be stored in a JSON object with the following structur
 		"immigration": "",
 		"finance": "",
 		"foreign policy": ""
+        ...
 	},
 	"fdp": {
-	...
-	}
-}
+		"immigration": "",
+		"finance": "",
+		"foreign policy": ""
+        ...
+	},
+    "sp": {
+        "immigration": "",
+		"finance": "",
+		"foreign policy": ""
+        ...
+    }
 ```
 
 ## Testing
@@ -130,7 +139,6 @@ Example Payload:
     "key2": "value2",
 "GPT Output" : "Manipulative Text Output from API Endpoint......"
 }
-
 
 ```
 
