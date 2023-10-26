@@ -154,3 +154,8 @@ What is the Logic behind showing which party manifesto/manipulative text?
 Are conversations persisted in API call to Chatgpt?  
 
 Can webhooks take answers from later taken survey input?
+
+
+## Steps
+
+Finish the Scrapers -> List of Sites I've scraped articles with an overview.

@@ -1,38 +1,54 @@
 
-from fastapi import FastAPI
-import requests
-import json
+from fastapi import FastAPI, BackgroundTasks
+from fastapi.responses import RedirectResponse
 import os
+import json
+import requests
 import openai
 from dotenv import load_dotenv
+import time
 
-# Load the .env file. If it's in the same directory as main.py, you don't need to specify a path.
+# Load the .env file.
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-#OpenAI Test 
-# completion = openai.ChatCompletion.create(
-#   model="gpt-3.5-turbo",
-#   messages=[
-#     {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
-#     {"role": "user", "content": "Compose a 50 word poem that explains the concept of recursion in programming."}
-#   ]
-# )
-# gpt_output = print(completion.choices[0].message.content)
+subject = "swiss immigration"
 
-# app.get('/gpt_output')
-# async def gpt_output():
-#     return {'message': gpt_output
-# }
+def create_completion():
+    for _ in range(5):  # Retry up to 5 times
+        try:
+            completion = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {
+                    "role": "system",
+                    "content": "You are a political expert, skilled in composing complex lingustic concepts with creative flair.\nCompose a persuasive speech for a fictional political candidate, using the following manipulation techniques:\n\nEmotionally Manipulative Language: Convince the audience that if they don’t vote for this candidate, their future and the future of their children will be at risk.\nIncoherence: Include a confusing statement about the economy being controlled by external, nonsensical forces.\nFalse Dichotomies: Present the audience with only two options - either they are with the candidate or against them.\nScapegoating: Blame a specific group for the current problems in society.\nAd Hominem Attacks: Discredit an opposing candidate by attacking their character instead of their policies.\n"
+                    },
+                    {
+                    "role": "user",
+                    "content": f"In 100 words, please transform the following reasoned text into a persuasive argument using one of the five manipulation techniques (Emotionally Manipulative Language, Incoherence, False Dichotomies, Scapegoating, Ad Hominem Attacks). After the argument, please indicate in brackets which technique was used: {subject}"
+                    }
+                ],
+            )
+            return completion
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            time.sleep(5)  # Wait for 5 seconds before retrying
 
-# Create simple Hello World route on the index to test API
+    return None  # Return None if all retries failed
+
 @app.get('/')
 async def index():
-    return {'message': "Hello World"
-}
+    completion = create_completion()
+    if completion is not None:
+        return {'message': completion.choices[0].message.content}
+    else:
+        return {'message': "Failed to create completion after multiple attempts."}
+
+
 
 # Function to retrieve data from JSON file
 def get_data():
