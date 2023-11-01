@@ -17,6 +17,7 @@ app = FastAPI()
 
 subject = "swiss immigration"
 
+# Testing Chatgpt Compatability
 def create_completion():
     for _ in range(5):  # Retry up to 5 times
         try:
