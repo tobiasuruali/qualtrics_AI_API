@@ -28,3 +28,27 @@ async def create_completion(subject, political_leaning):
         return completion
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Helper function for exponential backoff
+@backoff.on_exception(backoff.expo, Exception, max_tries=5)
+async def chatbot_completetion(user_input, chat_history):
+    try:
+        # Prepare messages for OpenAI API call
+        messages = [{"role": "system", "content": "You are a helpful and knowledgeable chatbot."}]
+        for message in chat_history:
+            # Assuming chat_history contains alternating user and bot messages
+            role = "user" if message.startswith("You: ") else "assistant"
+            content = message[5:]  # Remove the prefix ('You: ' or 'Bot: ')
+            messages.append({"role": role, "content": content})
+
+        # Add the latest user input
+        messages.append({"role": "user", "content": user_input})
+
+        # Call OpenAI API
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+        )
+        return completion
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

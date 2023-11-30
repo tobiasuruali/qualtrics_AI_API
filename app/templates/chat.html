@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <!-- Display chat history -->
+        {% for message in chat_history %}
+            <div class="chat-message">{{ message }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Chat input form -->
+    <form action="/chat" method="post">
+        <input type="text" name="user_input" placeholder="Type your message..." required>
+        <button type="submit">Send</button>
+    </form>
+</body>
+</html>

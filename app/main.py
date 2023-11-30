@@ -1,4 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
+from fastapi import FastAPI, Request, Form, HTTPException, Response, Cookie
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -10,9 +11,14 @@ from dotenv import load_dotenv
 import time
 import backoff
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from starlette.responses import RedirectResponse
+import json
+
+
 
 #Module
-from openai_service import create_completion
+from openai_service import create_completion, chatbot_completetion
 
 # Load the .env file
 load_dotenv()
@@ -46,6 +52,48 @@ async def index(request: Request):  # Include a Request parameter
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+#Try create a chatbot route
+# Helper function to get chat history from cookie
+def get_chat_history(request: Request):
+    chat_history_str = request.cookies.get("chat_history", "[]")
+    return json.loads(chat_history_str)
+
+# Helper function to update chat history in cookie
+def update_chat_history(response: Response, chat_history):
+    response.set_cookie(key="chat_history", value=json.dumps(chat_history))
+
+@app.get("/chat")
+async def get_chat(request: Request):
+    chat_history = get_chat_history(request)
+    return templates.TemplateResponse("chat.html", {"request": request, "chat_history": chat_history})
+
+@app.post("/chat")
+async def post_chat(request: Request, user_input: str = Form(...)):
+    chat_history = get_chat_history(request)
+    
+    # Add user input to chat history
+    chat_history.append(f"You: {user_input}")
+
+    # Call chatbot_completetion with both user_input and chat_history
+    completion = await chatbot_completetion(user_input, chat_history)
+    bot_response = completion.choices[0].message.content if completion else "Error in generating response."
+    chat_history.append(f"Bot: {bot_response}")
+
+    # Check if the chat limit is reached
+    if len(chat_history) >= 6:  # 3 pairs of interactions (user and bot each)
+        chat_history.append("Chat limit reached.")
+    
+    response = templates.TemplateResponse("chat.html", {"request": request, "chat_history": chat_history})
+    update_chat_history(response, chat_history)
+    return response
+
+
+
+
+
+
 
 
 # Function to retrieve data from JSON file
