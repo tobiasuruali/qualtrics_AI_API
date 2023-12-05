@@ -51,3 +51,49 @@ body {
 #chat-form button:hover {
     background-color: #45a049;
 }
+
+/* Profile picture styles */
+.message {
+    display: flex;
+    align-items: center;
+}
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* This makes the image round */
+    margin-right: 10px;
+    background-size: cover; /* Ensures the image covers the whole area */
+}
+.user .profile-pic {
+    background-image: url('/static/images/user_icon.png'); /* Updated path to your user image */
+}
+
+.bot .profile-pic {
+    background-image: url('/static/images/chatbot_icon.png'); /* Updated path to your bot image */
+}
+
+/* Loading indicator styles */
+.loading-indicator {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.dot {
+    height: 8px;
+    width: 8px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+    display: inline-block;
+    animation: dotFlashing 1s infinite linear alternate;
+    animation-delay: 0.5s;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.25s; }
+.dot:nth-child(3) { animation-delay: 0.5s; }
+
+@keyframes dotFlashing {
+    0% { background-color: #4CAF50; }
+    100% { background-color: #e0e0e0; }
+}

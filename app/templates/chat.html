@@ -1,48 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
     <head>
         <!-- Existing head content -->
         <link rel="stylesheet" type="text/css" href="/static/css/chat.css">
     </head>
 
     <body>
+        <div id="chat-container"></div>
 
-        <body>
-            <div id="chat-container"></div>
+        <form id="chat-form">
+            <input type="text" name="user_input" id="user-input" placeholder="Type your message..." required>
+            <button type="submit">Send</button>
+        </form>
 
-            <form id="chat-form">
-                <input type="text" name="user_input" id="user-input" placeholder="Type your message..." required>
-                <button type="submit">Send</button>
-            </form>
+        <script>
+            const chatContainer = document.getElementById('chat-container');
+            const chatForm = document.getElementById('chat-form');
+            const userInputField = document.getElementById('user-input');
 
-            <script>
-                // Fetch chat history on page load
-                document.getElementById('chat-form').addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    const userInput = document.getElementById('user-input').value;
-                    fetch('/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: `user_input=${encodeURIComponent(userInput)}`
+            chatForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const userInput = userInputField.value;
+                addMessageToChat('You', userInput);
+                showLoadingIndicator();
+
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_input=${encodeURIComponent(userInput)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        removeLoadingIndicator();
+                        updateChatHistory(data.chat_history);
+                        userInputField.value = ''; // Clear the input field
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Update chat container with new history
-                            const chatContainer = document.getElementById('chat-container');
-                            chatContainer.innerHTML = '';
-                            data.chat_history.forEach(message => {
-                                const messageDiv = document.createElement('div');
-                                messageDiv.textContent = message;
-                                chatContainer.appendChild(messageDiv);
-                            });
-                        })
-                        .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        removeLoadingIndicator();
+                    });
+            });
+
+            function updateChatHistory(chatHistory) {
+                chatContainer.innerHTML = ''; // Clear existing messages
+                chatHistory.forEach(message => {
+                    const [sender, messageText] = message.split(": ", 2);
+                    addMessageToChat(sender, messageText);
                 });
-            </script>
-        </body>
+            }
+
+            function addMessageToChat(sender, message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                if (sender === 'You') {
+                    messageDiv.classList.add('user');
+                } else if (sender === 'Bot') {
+                    messageDiv.classList.add('bot');
+                }
+                messageDiv.innerHTML = `<div class="profile-pic"></div><div>${sender}: ${message}</div>`;
+                chatContainer.appendChild(messageDiv);
+            }
+
+            function showLoadingIndicator() {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.classList.add('loading-indicator');
+                loadingDiv.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+                chatContainer.appendChild(loadingDiv);
+            }
+
+            function removeLoadingIndicator() {
+                const loadingDiv = chatContainer.querySelector('.loading-indicator');
+                if (loadingDiv) {
+                    chatContainer.removeChild(loadingDiv);
+                }
+            }
+        </script>
+
+
+    </body>
 
 </html>
