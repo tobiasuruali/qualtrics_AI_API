@@ -85,21 +85,20 @@ async def get_chat(request: Request, session_id: str = Depends(get_session_id)):
     )
 
 
-
 @app.post("/chat")
 async def post_chat(user_input: str = Form(...), session_id: str = Depends(get_session_id)):
     if session_id not in sessions:
         sessions[session_id] = []
 
     # Retrieve chat history from session storage
-    print("Session ID POST: ", sessions[session_id])
+    # print("Session ID POST: ", sessions[session_id])
     chat_history = sessions[session_id]
     # Clears session history after each refresh
     # chat_history = []
     chat_history.append(f"You: {user_input}")
 
     try:
-        bot_response = await chatbot_completion(user_input)
+        bot_response = await chatbot_completion("\n".join(chat_history))
         chat_history.append(f"Bot: {bot_response}")
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})

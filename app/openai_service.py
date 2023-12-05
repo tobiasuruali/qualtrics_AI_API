@@ -33,15 +33,19 @@ async def create_completion(subject, political_leaning):
 
 # Helper function for exponential backoff
 @backoff.on_exception(backoff.expo, Exception, max_tries=5)
-async def chatbot_completion(user_input):
+async def chatbot_completion(conversation_context):
     try:
-        # Call OpenAI API with the latest user input
+        messages = [{"role": "system", "content": "You are a helpful and knowledgeable chatbot."}]
+        for message in conversation_context.split("\n"):
+            role, content = ("user" if message.startswith("You: ") else "assistant", message[5:])
+            messages.append({"role": role, "content": content})
+
+        # Print the messages being sent to OpenAI for debugging
+        print("Sending to OpenAI:", messages)
+
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful and knowledgeable chatbot."},
-                {"role": "user", "content": user_input},
-            ],
+            model="gpt-3.5-turbo-1106",
+            messages=messages,
         )
         return (
             completion.choices[0].message.content
