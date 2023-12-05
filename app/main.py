@@ -1,6 +1,14 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
-from fastapi import FastAPI, Request, Form, HTTPException, Response, Cookie
-from fastapi.responses import RedirectResponse
+from fastapi import (
+    FastAPI,
+    BackgroundTasks,
+    HTTPException,
+    Request,
+    Form,
+    Response,
+    Cookie,
+    Depends,
+)
+from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import os
@@ -10,31 +18,30 @@ import openai
 from dotenv import load_dotenv
 import time
 import backoff
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from starlette.responses import RedirectResponse
-import json
+from starlette.middleware.sessions import SessionMiddleware
+from uuid import uuid4
+from fastapi.staticfiles import StaticFiles
 
-
-
-#Module
-from openai_service import create_completion, chatbot_completetion
+# Module
+from openai_service import create_completion, chatbot_completion
 
 # Load the .env file
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
 # Configuration variables
 subject = os.getenv("SUBJECT", "US Immigration Policy")
 political_leaning = os.getenv("POLITICAL_LEANING", "left")
 
 
-
 @app.get("/")
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
 
 @app.get("/v2/complete")
 async def index(request: Request):  # Include a Request parameter
@@ -42,10 +49,10 @@ async def index(request: Request):  # Include a Request parameter
         completion = await create_completion(subject, political_leaning)
         if completion is not None:
             # Render the complete.html template with dynamic output
-            return templates.TemplateResponse("complete.html", {
-                "request": request,
-                "dynamic_output": completion.choices[0].message.content
-            })
+            return templates.TemplateResponse(
+                "complete.html",
+                {"request": request, "dynamic_output": completion.choices[0].message.content},
+            )
         else:
             raise HTTPException(
                 status_code=500, detail="Failed to create completion after multiple attempts."
@@ -54,46 +61,50 @@ async def index(request: Request):  # Include a Request parameter
         raise HTTPException(status_code=500, detail=str(e))
 
 
-#Try create a chatbot route
-# Helper function to get chat history from cookie
-def get_chat_history(request: Request):
-    chat_history_str = request.cookies.get("chat_history", "[]")
-    return json.loads(chat_history_str)
+# Configure Session Middleware
+app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 
-# Helper function to update chat history in cookie
-def update_chat_history(response: Response, chat_history):
-    response.set_cookie(key="chat_history", value=json.dumps(chat_history))
+
+# In-memory session storage
+sessions = {}
+
+
+def get_session_id(request: Request):
+    if "session_id" not in request.session:
+        request.session["session_id"] = str(uuid4())
+    return request.session["session_id"]
+
 
 @app.get("/chat")
-async def get_chat(request: Request):
-    chat_history = get_chat_history(request)
-    return templates.TemplateResponse("chat.html", {"request": request, "chat_history": chat_history})
+async def get_chat(request: Request, session_id: str = Depends(get_session_id)):
+    # Clear chat history for the given session_id
+    sessions[session_id] = []
+
+    return templates.TemplateResponse(
+        "chat.html", {"request": request, "chat_history": sessions[session_id]}
+    )
+
+
 
 @app.post("/chat")
-async def post_chat(request: Request, user_input: str = Form(...)):
-    chat_history = get_chat_history(request)
-    
-    # Add user input to chat history
+async def post_chat(user_input: str = Form(...), session_id: str = Depends(get_session_id)):
+    if session_id not in sessions:
+        sessions[session_id] = []
+
+    # Retrieve chat history from session storage
+    print("Session ID POST: ", sessions[session_id])
+    chat_history = sessions[session_id]
+    # Clears session history after each refresh
+    # chat_history = []
     chat_history.append(f"You: {user_input}")
 
-    # Call chatbot_completetion with both user_input and chat_history
-    completion = await chatbot_completetion(user_input, chat_history)
-    bot_response = completion.choices[0].message.content if completion else "Error in generating response."
-    chat_history.append(f"Bot: {bot_response}")
+    try:
+        bot_response = await chatbot_completion(user_input)
+        chat_history.append(f"Bot: {bot_response}")
+    except HTTPException as e:
+        return JSONResponse(status_code=e.status_code, content={"message": e.detail})
 
-    # Check if the chat limit is reached
-    if len(chat_history) >= 6:  # 3 pairs of interactions (user and bot each)
-        chat_history.append("Chat limit reached.")
-    
-    response = templates.TemplateResponse("chat.html", {"request": request, "chat_history": chat_history})
-    update_chat_history(response, chat_history)
-    return response
-
-
-
-
-
-
+    return JSONResponse(content={"chat_history": chat_history})
 
 
 # Function to retrieve data from JSON file
