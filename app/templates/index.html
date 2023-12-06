@@ -1,69 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-        }
-        header {
-            background: #50a3a2;
-            height: 100px;
-            padding: 5px 10px;
-            color: white;
-        }
-        header h1 {
-            margin: 0;
-            padding-top: 15px;
-        }
-        main {
-            padding: 20px;
-            background: white;
-            color: #333333;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Welcome to the Professional Page</h1>
+{% extends "jinja_templates/standard_template.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 class="display-4"><strong>Qualtrics Interactive Political Chatbot</strong></h1>
+                <p class="lead">On this platform, we developed an advanced API solution building an interactive political chatbot. Our focus is on academic research and experimentation, making it an ideal tool for your master thesis. With our cutting-edge technology, you can explore the dynamics of political discourse and analyze the interactions within this domain.</p>
+                <hr class="my-4">
+                
+                <h2>Contact Us</h2>
+                <p>For inquiries, support, or feedback, please <a href="/about" class="api-link">contact us</a>. Our team is ready to assist you with any questions or support you may need regarding our services.</p>
+
+                <h2>Chatbot Completion Example</h2>
+                <p>
+                    Access an illustrative example of politically influenced content generation through this 
+                    <a href="/v2/complete" class="api-link">link</a>. Here, you'll find a sample output centered 
+                    on "US Immigration Policy," crafted against a left-leaning perspective. This page serves as a 
+                    demonstration of how political leanings can shape and impact the creation of topical content.
+                </p>
+                
+
+                <h2>Interactive Political Chatbot</h2>
+                <p>Discover the insights and dynamics of political discourse with our <a href="/chat" class="api-link">Interactive Political Chatbot</a>. It's a unique platform for engaging in political discussions and analysis.</p>
+
+                <br>
+                <a class="btn btn-success btn-lg" href="/chat" role="button">Get Started with Our API</a>
+                <br><br>
+                <!-- Placeholder for an Image or a Graphical Representation -->
+                <img src="/static/images/api_sequence.png" alt="API Illustration" style="width: 50%; height: auto;">
+            </div>
         </div>
-    </header>
+    </div>
+{% endblock %}
 
-    <!-- Existing code -->
-    <main class="container">
-        <h2>About</h2>
-        <p>This is a professional and nice looking webpage.</p>
-
-        <h2>Contact</h2>
-        <p>Please feel free to get in touch.</p>
-
-        <!-- New section -->
-        <h2>Chatbot Completions</h2>
-        <p>Explore our advanced <a href="v2/complete" class="professional-link">Chatbot Completions</a>.</p>
-    </main>
-
-    <!-- Add this to your CSS -->
-    <style>
-        .professional-link {
-            color: #50a3a2;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .professional-link:hover {
-            color: #333333;
-        }
-    </style>
-</body>
-</html>

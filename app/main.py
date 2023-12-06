@@ -49,15 +49,58 @@ political_leaning = os.getenv("POLITICAL_LEANING", "left")
 
 @app.get("/")
 async def index(request: Request):
+    """
+    Serves the home page of the application.
+
+    This function provides the user with an initial interface or landing page.
+
+    Args:
+        request (Request): The HTTP request object.
+
+    Returns:
+        TemplateResponse: The response containing the rendered "index.html" template.
+    """
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/v2/complete")
-async def index(request: Request):  # Include a Request parameter
+
+@app.get("/about", summary="Renders the about page.")
+async def about(request: Request):
+    """
+    Renders the about page.
+
+    This function renders the "about.html" template.
+
+    Args:
+        request (Request): The request object containing information about the HTTP request.
+
+    Returns:
+        TemplateResponse: A TemplateResponse object that renders the "about.html" template.
+    """
+    return templates.TemplateResponse("about.html", {"request": request})
+
+
+
+@app.get("/v2/complete", summary="Handles requests for an example text completion.")
+async def index(request: Request):
+    """
+    Handles requests for text completion.
+
+    This function takes a request object as a parameter and generates and displays relevant content based on user-defined subjects and political leanings.
+
+    Args:
+        request (Request): The request object containing information about the HTTP request.
+
+    Raises:
+        HTTPException: If there is an error during the completion generation process.
+        HTTPException: If the completion generation fails after multiple attempts.
+
+    Returns:
+        TemplateResponse: A TemplateResponse object that renders the "complete.html" template with dynamic output.
+    """
     try:
         completion = await create_completion(subject, political_leaning)
         if completion is not None:
-            # Render the complete.html template with dynamic output
             return templates.TemplateResponse(
                 "complete.html",
                 {"request": request, "dynamic_output": completion.choices[0].message.content},
@@ -72,8 +115,6 @@ async def index(request: Request):  # Include a Request parameter
 
 # Configure Session Middleware
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
-
-
 # In-memory session storage
 sessions = {}
 
@@ -84,8 +125,21 @@ def get_session_id(request: Request):
     return request.session["session_id"]
 
 
-@app.get("/chat")
+@app.get("/chat",  summary="Presents the chat interface and initializes a chat session.")
 async def get_chat(request: Request, session_id: str = Depends(get_session_id)):
+    """
+    Presents the chat interface and initializes or continues a chat session.
+
+    Args:
+        request (Request): The incoming request object.
+        session_id (str, optional): The session ID for the chat session. Defaults to the session ID obtained from the get_session_id dependency.
+
+    Returns:
+        TemplateResponse: The template response containing the chat interface and any existing chat history.
+
+    Notes:
+        - The chat history is cleared once the page is refreshed.
+    """
     # Clear chat history for the given session_id
     sessions[session_id] = []
 
@@ -94,16 +148,25 @@ async def get_chat(request: Request, session_id: str = Depends(get_session_id)):
     )
 
 
-@app.post("/chat")
+@app.post("/chat", summary="Handles user input for the chat.")
 async def post_chat(user_input: str = Form(...), session_id: str = Depends(get_session_id)):
+    """
+    Handles user input for the chat. It processes and stores the user's message, generates a bot response from OpenAI, and updates the chat history.
+
+    Args:
+        user_input (str): The user's input message.
+        session_id (str): The session ID for the chat.
+
+    Returns:
+        JSONResponse: The response containing the updated chat history.
+
+    Raises:
+        HTTPException: If there is an error during the chatbot completion process.
+    """
     if session_id not in sessions:
         sessions[session_id] = []
 
-    # Retrieve chat history from session storage
-    # print("Session ID POST: ", sessions[session_id])
     chat_history = sessions[session_id]
-    # Clears session history after each refresh
-    # chat_history = []
     chat_history.append(f"You: {user_input}")
 
     try:

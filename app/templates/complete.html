@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Interface</title>
+{% extends "jinja_templates/standard_template.html" %}
+
+{% block title %}Chatbot Output Example{% endblock %}
+
+{% block main %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,12 +34,10 @@
             text-align: right;
         }
     </style>
-</head>
-<body>
 <!-- ... other HTML code ... -->
 
 <div class="chat-container">
-    <h2>Chatbot Response</h2>
+    <h2>Example Chatbot Response</h2>
     <div class="chat-message bot-message">
         {{ dynamic_output }}
     </div>
@@ -48,5 +45,4 @@
 
 <!-- ... other HTML code ... -->
 
-</body>
-</html>
+{% endblock %}
