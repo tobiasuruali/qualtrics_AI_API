@@ -12,6 +12,9 @@ Qualtrics AI API is a powerful tool designed to generate dynamic chatbot interac
 Pull the latest version of the Qualtrics AI API from the GitHub repository:
 
 ## Usage
+
+![Example Political Chatbot Interaction](/app/static/example_interaction_chatbot.png)
+
 FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.6+ based on standard Python type hints. In the context of the Qualtrics AI API, FastAPI is used to create dynamic chatbot interactions.
 
 Key features of FastAPI that benefit the Qualtrics AI API include:
