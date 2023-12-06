@@ -22,16 +22,25 @@ from starlette.middleware.sessions import SessionMiddleware
 from uuid import uuid4
 from fastapi.staticfiles import StaticFiles
 
-# Module
-from openai_service import create_completion, chatbot_completion
+# Module Local
+# from openai_service import create_completion, chatbot_completion
+
+# Module Docker
+from .openai_service import create_completion, chatbot_completion
 
 # Load the .env file
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+# # Local File run
+# app.mount("/static", StaticFiles(directory="static"), name="static")
+# templates = Jinja2Templates(directory="templates")
+
+# Docker File run
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+
 
 # Configuration variables
 subject = os.getenv("SUBJECT", "US Immigration Policy")

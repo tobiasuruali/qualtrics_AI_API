@@ -162,6 +162,7 @@ cython_debug/
 
 #Python Environment
 env_api/
-
+env.md
+docker-compose.yml
 # Folders
 notes/qualtrics_AI_concept/notes_dump/

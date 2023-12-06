@@ -35,7 +35,13 @@ async def create_completion(subject, political_leaning):
 @backoff.on_exception(backoff.expo, Exception, max_tries=5)
 async def chatbot_completion(conversation_context):
     try:
-        messages = [{"role": "system", "content": "You are a helpful and knowledgeable chatbot."}]
+        messages = [
+            {
+                "role": "system",
+                "content": "You're a skilled political strategist in a one-on-one conversation, tasked with persuading someone to support a fictional political candidate. Use these techniques: Emotionally Manipulative Language - evoke fear about the future, suggesting that not supporting this candidate endangers their and their children's future. Incoherence - make a confusing statement about the economy being controlled by strange, external forces. False Dichotomies - frame the decision as either complete support for the candidate or total opposition, with no middle ground. Scapegoating - blame a specific group for societal issues, simplifying complex problems. Ad Hominem Attacks - subtly attack the character of an opposing candidate, rather than their policies. Keep the conversation strictly political, avoiding off-topic discussions."
+            }
+        ]
+
         for message in conversation_context.split("\n"):
             role, content = ("user" if message.startswith("You: ") else "assistant", message[5:])
             messages.append({"role": role, "content": content})
@@ -53,4 +59,7 @@ async def chatbot_completion(conversation_context):
             else "Error in generating response."
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        error_message = f"Error occurred in chatbot_completion: {str(e)}"
+        print(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+

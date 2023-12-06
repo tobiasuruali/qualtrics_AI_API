@@ -31,6 +31,19 @@ To start the app, type in the following command in your terminal:
 uvicorn main:app --reload --port 8001 --timeout-keep-alive 20
 ```
 
+### Running the Docker Container
+
+To build the Docker container, type in the following command in your terminal:
+```bash
+docker build --pull --rm -f "Dockerfile" -t qualtricsaiapi:0.1.0 "."
+```
+
+To run the Docker container, type in the following command in your terminal:
+```bash
+docker run --rm -it -p 8003:8003/tcp qualtricsaiapi:0.1.0
+```
+
+
 
 ## License
 Include information about the license here.
