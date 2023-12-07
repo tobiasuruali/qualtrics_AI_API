@@ -19,9 +19,13 @@ from dotenv import load_dotenv
 import time
 import backoff
 from starlette.middleware.sessions import SessionMiddleware
+
+# from starlette.middleware.base import BaseHTTPMiddleware
+# from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from uuid import uuid4
 from fastapi.staticfiles import StaticFiles
 
+# import logging
 # Module Local
 # from openai_service import create_completion, chatbot_completion
 
@@ -33,6 +37,7 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
+
 # # Local File run
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 # templates = Jinja2Templates(directory="templates")
@@ -63,7 +68,6 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-
 @app.get("/about", summary="Renders the about page.")
 async def about(request: Request):
     """
@@ -78,7 +82,6 @@ async def about(request: Request):
         TemplateResponse: A TemplateResponse object that renders the "about.html" template.
     """
     return templates.TemplateResponse("about.html", {"request": request})
-
 
 
 @app.get("/v2/complete", summary="Handles requests for an example text completion.")
@@ -125,7 +128,7 @@ def get_session_id(request: Request):
     return request.session["session_id"]
 
 
-@app.get("/chat",  summary="Presents the chat interface and initializes a chat session.")
+@app.get("/chat", summary="Presents the chat interface and initializes a chat session.")
 async def get_chat(request: Request, session_id: str = Depends(get_session_id)):
     """
     Presents the chat interface and initializes or continues a chat session.

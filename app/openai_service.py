@@ -11,7 +11,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Helper function for exponential backoff
 @backoff.on_exception(backoff.expo, Exception, max_tries=5)
-async def create_completion(subject, political_leaning):
+async def create_completion(subject: str, political_leaning: str):
     try:
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",

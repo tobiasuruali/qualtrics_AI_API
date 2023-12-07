@@ -11,19 +11,23 @@
             integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <!-- Import our custom stylesheet -->
         <link rel="stylesheet" href="/static/css/style.css">
-
+        <!-- Import Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
         <title>{% block title %}{% endblock %}</title>
     </head>
 
     <body>
         <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #CFFBE2;">
-            <a class="navbar-brand" href="/">Home</a>
+            <a class="navbar-brand" href="/"><i class="fa-solid fa-house"></i></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="/about">About</a>
-                    </li>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/v2/complete">Chatbot Completion</a>
