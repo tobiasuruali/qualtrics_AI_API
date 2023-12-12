@@ -67,6 +67,17 @@ async def index(request: Request):
     """
     return templates.TemplateResponse("index.html", {"request": request})
 
+# Create a hello get endpoint that returns a simple json key value pair
+@app.get("/hello")
+async def hello():
+    """
+    Simple get endpoint that returns a key value pair.
+
+    Returns:
+        JSONResponse: The response containing the key value pair.
+    """
+    return JSONResponse(content={"message": "Hello World"})
+
 
 @app.get("/about", summary="Renders the about page.")
 async def about(request: Request):

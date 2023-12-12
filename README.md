@@ -14,7 +14,7 @@ Pull the latest version of the Qualtrics AI API from the GitHub repository:
 ## Usage
 
 ### Example Interaction with Chatbot
-![Example Political Chatbot Interaction](app/static/images/example_interaction_chatbot.png) 
+![Example Political Chatbot Interaction](app/static/images/example_chatbot_interaction.png) 
 
 
 ### FastAPI
