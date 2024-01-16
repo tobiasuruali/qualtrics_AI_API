@@ -55,5 +55,8 @@ Follow the instructions ![here](https://developers.cloudflare.com/cloudflare-one
 cloudflared tunnel --url localhost:8003
 ```
 
+This will create a secure tunnel to your localhost on port 8003. You can then use the URL provided by cloudflared to test the API.
+Be careful not to share this URL with anyone as it will allow them to access your localhost.
+
 ## License
 Include information about the license here.
