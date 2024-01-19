@@ -67,6 +67,7 @@ async def index(request: Request):
     """
     return templates.TemplateResponse("index.html", {"request": request})
 
+
 # Create a hello get endpoint that returns a simple json key value pair
 @app.get("/hello")
 async def hello():
@@ -140,7 +141,13 @@ def get_session_id(request: Request):
 
 
 @app.get("/chat", summary="Presents the chat interface and initializes a chat session.")
-async def get_chat(request: Request, session_id: str = Depends(get_session_id)):
+async def get_chat(
+    request: Request,
+    responseSchool: str = None,
+    responseLeaning: int = None,
+    responseSubject: str = None,
+    session_id: str = Depends(get_session_id),
+):
     """
     Presents the chat interface and initializes or continues a chat session.
 
@@ -155,8 +162,18 @@ async def get_chat(request: Request, session_id: str = Depends(get_session_id)):
         - The chat history is cleared once the page is refreshed.
     """
     # Clear chat history for the given session_id
-    sessions[session_id] = []
+    sessions[session_id] = {
+        "chat_history": [],
+        "responseSchool": responseSchool,
+        "responseLeaning": responseLeaning,
+        "responseSubject": responseSubject,
+    }
 
+    print("Session: ", sessions[session_id])
+
+    print("School: ", responseSchool)
+    print("Leaning: ", responseLeaning)
+    print("Subject: ", responseSubject)
     return templates.TemplateResponse(
         "chat.html", {"request": request, "chat_history": sessions[session_id]}
     )
@@ -178,13 +195,25 @@ async def post_chat(user_input: str = Form(...), session_id: str = Depends(get_s
         HTTPException: If there is an error during the chatbot completion process.
     """
     if session_id not in sessions:
-        sessions[session_id] = []
+        sessions[session_id] = {
+            "chat_history": [],
+            "responseSchool": None,
+            "responseLeaning": None,
+            "responseSubject": None,
+        }
 
-    chat_history = sessions[session_id]
+    session_data = sessions[session_id]
+    chat_history = session_data["chat_history"]
     chat_history.append(f"You: {user_input}")
 
     try:
-        bot_response = await chatbot_completion("\n".join(chat_history))
+        # Access responseSchool and responseLeaning in your chatbot_completion function
+        bot_response = await chatbot_completion(
+            "\n".join(chat_history),
+            session_data["responseSchool"],
+            session_data["responseLeaning"],
+            session_data["responseSubject"],
+        )
         chat_history.append(f"Bot: {bot_response}")
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})
