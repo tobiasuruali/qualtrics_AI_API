@@ -38,6 +38,7 @@
                 event.preventDefault();
                 const userInput = userInputField.value;
                 addMessageToChat('You', userInput);
+                userInputField.value = ''; // Clear the input field
                 showLoadingIndicator();
 
                 fetch('/chat', {
@@ -51,7 +52,6 @@
                     .then(data => {
                         removeLoadingIndicator();
                         updateChatHistory(data.chat_history);
-                        userInputField.value = ''; // Clear the input field
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -65,6 +65,8 @@
                     const [sender, messageText] = message.split(": ", 2);
                     addMessageToChat(sender, messageText);
                 });
+                window.parent.postMessage(JSON.stringify(chatHistory), '*');
+                console.log("Chat post message: ", JSON.stringify(chatHistory));
             }
 
             function addMessageToChat(sender, message) {

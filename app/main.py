@@ -135,9 +135,14 @@ sessions = {}
 
 
 def get_session_id(request: Request):
-    if "session_id" not in request.session:
-        request.session["session_id"] = str(uuid4())
-    return request.session["session_id"]
+    print("Session Details: ", request.session)
+    print("Query Params: ", request.query_params)
+    if "session_id" in request.query_params:
+        return request.query_params["session_id"]
+    else:
+        if "session_id" not in request.session:
+            request.session["session_id"] = str(uuid4())
+        return request.session["session_id"]
 
 
 @app.get("/chat", summary="Presents the chat interface and initializes a chat session.")
@@ -169,8 +174,8 @@ async def get_chat(
         "responseSubject": responseSubject,
     }
 
+    print("SessionsID: ", session_id)
     print("Session: ", sessions[session_id])
-
     print("School: ", responseSchool)
     print("Leaning: ", responseLeaning)
     print("Subject: ", responseSubject)
