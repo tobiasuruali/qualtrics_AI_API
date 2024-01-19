@@ -50,7 +50,7 @@ docker run --rm -it -p 8003:8003/tcp qualtricsaiapi:0.1.0
 ```
 
 ### Cloudflare Tunnel For Testing
-Follow the instructions ![here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) to download a cloudflared lightweight daemon. Then, run the following command in your terminal:
+Follow the instructions [here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) to download a cloudflared lightweight daemon. Then, run the following command in your terminal:
 ```bash
 cloudflared tunnel --url localhost:8003
 ```
