@@ -29,6 +29,7 @@ from fastapi.staticfiles import StaticFiles
 # import logging
 # Module Local
 # from openai_service import create_completion, chatbot_completion
+# from post_data import ChatInput
 
 # Module Docker
 from .openai_service import create_completion, chatbot_completion
@@ -224,16 +225,16 @@ async def post_chat(chat_input: ChatInput = Body(...)):
         }
 
     session_data = sessions[session_id]
-    print("Session Data in Post Request: ", session_data)
     chat_history = session_data["chat_history"]
     # Append user message
     chat_history["user"].append(user_input)
     # chat_history.append(f"You: {user_input}")
+    print("Session Data in Post Request: ", session_data)
 
     try:
         # Access responseSchool and responseLeaning in your chatbot_completion function
         bot_response = await chatbot_completion(
-            "\n".join(chat_history),
+            chat_history,
             session_data["responseSchool"],
             session_data["responseLeaning"],
             session_data["responseSubject"],

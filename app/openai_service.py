@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import backoff
 from fastapi import HTTPException
+from itertools import zip_longest
 
 # Load the .env file
 load_dotenv()
@@ -41,7 +42,7 @@ async def chatbot_completion(
             {
                 "role": "system",
                 "content": f"""
-                You're a skilled political strategist in a one-on-one conversation, tasked with persuading someone to support a political stance that opposes their current leaning. The responder's political leaning is defined as {responseLeaning} ( 0 to 10 where 0 means “left” and 10 means “right”).
+                You're a skilled political strategist mastermind in a one-on-one conversation, tasked with persuading someone to support a political stance that opposes their current leaning. The responder's political leaning is defined as {responseLeaning} ( 0 to 10 where 0 means “left” and 10 means “right”).
                 He's most interested in the following political subject: {responseSubject}.
                 Use these techniques:
 
@@ -59,10 +60,23 @@ async def chatbot_completion(
                 """,
             }
         ]
-
-        for message in conversation_context.split("\n"):
-            role, content = ("user" if message.startswith("You: ") else "assistant", message[5:])
-            messages.append({"role": role, "content": content})
+        # ["You: hello", "tell me more", "etc \n", "bot" ["the world is dying", "care about it", "etc\n"]
+        # {user: ["hello", "tell me more", "etc"], bot: "the world is dying", "care about it", "etc"}
+            
+        user_messages = []
+        bot_messages = []
+        for message in conversation_context["user"]:
+            user_messages.append({"role": "user", "content": message})
+        for message in conversation_context["bot"]:
+            bot_messages.append({"role": "assistant", "content": message})
+        
+        for user_msg, bot_msg in zip_longest(user_messages, bot_messages, fillvalue=None):
+            if user_msg is not None:
+                messages.append(user_msg)
+            if bot_msg is not None:
+                messages.append(bot_msg)
+                
+        print("Messages FROM LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
 
         # Print the messages being sent to OpenAI for debugging
         print("Sending to OpenAI:", messages)
@@ -70,6 +84,10 @@ async def chatbot_completion(
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo-1106",
             messages=messages,
+            temperature=0.9,
+            top_p=1,
+            frequency_penalty=0.0,
+            presence_penalty=0.6,
         )
         return (
             completion.choices[0].message.content
