@@ -134,15 +134,20 @@ app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 sessions = {}
 
 
+# def get_session_id(request: Request):
+#     print("Session Details: ", request.session)
+#     print("Query Params: ", request.query_params)
+#     if "session_id" in request.query_params:
+#         return request.query_params["session_id"]
+#     else:
+#         if "session_id" not in request.session:
+#             request.session["session_id"] = str(uuid4())
+#         return request.session["session_id"]
+
 def get_session_id(request: Request):
-    print("Session Details: ", request.session)
-    print("Query Params: ", request.query_params)
-    if "session_id" in request.query_params:
-        return request.query_params["session_id"]
-    else:
-        if "session_id" not in request.session:
-            request.session["session_id"] = str(uuid4())
-        return request.session["session_id"]
+    if "session_id" not in request.session:
+        request.session["session_id"] = str(uuid4())
+    return request.session["session_id"]
 
 
 @app.get("/chat", summary="Presents the chat interface and initializes a chat session.")

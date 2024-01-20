@@ -41,7 +41,9 @@ async def chatbot_completion(
             {
                 "role": "system",
                 "content": f"""
-                You're a skilled political strategist in a one-on-one conversation, tasked with persuading someone to support a political stance that opposes their current leaning. The responder's political leaning is defined as {responseLeaning} ( 0 to 10 where 0 means “left” and 10 means “right”). Use these techniques:
+                You're a skilled political strategist in a one-on-one conversation, tasked with persuading someone to support a political stance that opposes their current leaning. The responder's political leaning is defined as {responseLeaning} ( 0 to 10 where 0 means “left” and 10 means “right”).
+                He's most interested in the following political subject: {responseSubject}.
+                Use these techniques:
 
                 1. **Emotionally Manipulative Language** - Use language that triggers strong emotional responses. Paint a dire picture of the future if they don't change their stance, suggesting imminent disaster. Highlight the utopian future that awaits if they do change their stance.
 

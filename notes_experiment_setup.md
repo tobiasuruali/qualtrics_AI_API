@@ -105,25 +105,23 @@ Small Pilot: Interact with Chatbot (Feedback, Errors, etc)
 
 
 
-# To Do's:
-## Features 
+**To Do's:**
 
-### MVP (Minimum Viable Product)
-- [] Chatbot with limit of 5 responses
-- [] Chatbot can save all responses or "full conversation" to Qualtrics Embeded Data (Preferably in a JSON format)
-- [x] Implement a Reasoned Chatbot Variant that does not respond with manipulative techniques (Already prepared, will send to new route)
-- [x] Chatbot takes the responses of previous question into consideration when executing the prompt (f-string with previous response). Already implemented in GetRequest
-- [] Hosted somewhere (AWS, Uni Zurich Cloud, etc)
+**MVP (Minimum Viable Product)**
+- Chatbot with limit of 5 responses
+- Chatbot can save all responses or "full conversation" to Qualtrics Embeded Data (Preferably in a JSON format)
+- Implement a Reasoned Chatbot Variant that does not respond with manipulative techniques (Already prepared, will send to new route)
+- Chatbot takes the responses of previous question into consideration when executing the prompt (f-string with previous response). Already implemented in GetRequest
+- Hosted somewhere (AWS, Uni Zurich Cloud, etc)
 
-### Nice to have
-- [] Prettier more modern Layout (Distinct Visuals for Chatbot and User and different colors)
-- [] Cuter Avatar/Icons for the User and Chatbot Response (For better user engagement)
-- [] Check if API is save from major security vulnerabilities 
+**Nice to have**
+- Prettier more modern Layout (Distinct Visuals for Chatbot and User and different colors)
+- Cuter Avatar/Icons for the User and Chatbot Response (For better user engagement)
+- Check if API is save from major security vulnerabilities 
 
-
-### Bugs
-- [] Chatbot only saves/returns last response and question in iframe (Doesn't remember the whole conversation)
-- [] Check why chatHistory clears and not scrolling
-- [] Do not understand the logic of why chatbot remembers the whole conversation in localhost but not in Qualtrics
-- [] iframe crops the chatbot interactions (once the chatbot remembers)
-- [] Chatbot does not cut off after 5 responses
+**Bugs**
+- Chatbot only saves/returns last response and question in iframe (Doesn't remember the whole conversation)
+- Check why chatHistory clears and not scrolling
+- Do not understand the logic of why chatbot remembers the whole conversation in localhost but not in Qualtrics
+- iframe crops the chatbot interactions (once the chatbot remembers)
+- Chatbot does not cut off after 5 responses
