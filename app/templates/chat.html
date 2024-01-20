@@ -36,13 +36,30 @@
             const userInputField = document.getElementById('user-input');
             const session = document.getElementById('paragraph');
 
+            let userMessageCount = 0; // Keep track of how many messages the user has sent in a row
+
             chatForm.addEventListener('submit', function (event) {
                 event.preventDefault();
+            
                 const userInput = userInputField.value;
                 addMessageToChat('You', userInput);
                 userInputField.value = ''; // Clear the input field
+            
+                // Check if the user has already sent 4 messages
+                if (userMessageCount >= 4) {
+                    // Directly add the final bot message
+                    addMessageToChat('Bot', "Thank you for your conversation!");
+                    showLoadingIndicator();
+                    setTimeout(function() {
+                        removeLoadingIndicator();
+                        disableChatForm(); // Disable the chat form
+                    }, 1000); // Simulate loading for the final message
+                    userMessageCount++;
+                    return; // Stop further processing
+                }
+            
+                // Continue with the usual process for the first 4 messages
                 showLoadingIndicator();
-
                 console.log("Session: ", session.innerHTML);
                 fetch('/chat', {
                     method: 'POST',
@@ -53,8 +70,6 @@
                         user_input: userInput,
                         session_id: session.innerHTML
                     })
-                    // body: `user_input=${encodeURIComponent(userInput)},
-                    // session_id=${session.innerHTML}`
                 })
                     .then(response => response.json())
                     .then(data => {
@@ -65,6 +80,8 @@
                         console.error('Error:', error);
                         removeLoadingIndicator();
                     });
+            
+                userMessageCount++; // Increment the message count after sending a message
             });
 
             function updateChatHistory(chatHistory) {
@@ -93,7 +110,11 @@
                 } else if (sender === 'Bot') {
                     messageDiv.classList.add('bot');
                 }
-                messageDiv.innerHTML = `<div class="profile-pic"></div><div>${sender}: ${message}</div>`;
+                
+                // Replace newline characters with <br> tags
+                const formattedMessage = message.replace(/\n/g, '<br>');
+            
+                messageDiv.innerHTML = `<div class="profile-pic"></div><div>${sender}: ${formattedMessage}</div>`;
                 chatContainer.appendChild(messageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
@@ -111,6 +132,20 @@
                     chatContainer.removeChild(loadingDiv);
                 }
             }
+            function disableChatForm() {
+                // Disable the text input field and the submit button
+                userInputField.disabled = true;
+                const submitButton = chatForm.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+                // Send a message to the parent window
+                const message = { conversation_end: true };
+                window.parent.postMessage(message, "*"); // End of conversation reached to Qualtrics
+                console.log("Disable chat post message: ", message);
+            }
+            
+
         </script>
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
