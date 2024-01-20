@@ -175,7 +175,7 @@ async def get_chat(
     """
     # Clear chat history for the given session_id
     sessions[session_id] = {
-        "chat_history": [],
+        "chat_history": {"user": [], "bot": []},
         "responseSchool": responseSchool,
         "responseLeaning": responseLeaning,
         "responseSubject": responseSubject,
@@ -211,12 +211,13 @@ async def post_chat(chat_input: ChatInput = Body(...)):
         HTTPException: If there is an error during the chatbot completion process.
     """
     user_input = chat_input.user_input
+    print("User Input: ", user_input)
     session_id = chat_input.session_id
     
     if session_id not in sessions:
         print("Session ID not in sessions: ", session_id)
         sessions[session_id] = {
-            "chat_history": [],
+            "chat_history": {"user": [], "bot": []},
             "responseSchool": None,
             "responseLeaning": None,
             "responseSubject": None,
@@ -225,7 +226,9 @@ async def post_chat(chat_input: ChatInput = Body(...)):
     session_data = sessions[session_id]
     print("Session Data in Post Request: ", session_data)
     chat_history = session_data["chat_history"]
-    chat_history.append(f"You: {user_input}")
+    # Append user message
+    chat_history["user"].append(user_input)
+    # chat_history.append(f"You: {user_input}")
 
     try:
         # Access responseSchool and responseLeaning in your chatbot_completion function
@@ -235,7 +238,9 @@ async def post_chat(chat_input: ChatInput = Body(...)):
             session_data["responseLeaning"],
             session_data["responseSubject"],
         )
-        chat_history.append(f"Bot: {bot_response}")
+        # Append bot response
+        chat_history["bot"].append(bot_response)
+        # chat_history.append(f"Bot: {bot_response}")
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})
 

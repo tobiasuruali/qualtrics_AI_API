@@ -69,13 +69,21 @@
 
             function updateChatHistory(chatHistory) {
                 chatContainer.innerHTML = ''; // Clear existing messages
-                chatHistory.forEach(message => {
-                    const [sender, messageText] = message.split(": ", 2);
-                    addMessageToChat(sender, messageText);
-                });
+            
+                const totalMessages = Math.max(chatHistory.user.length, chatHistory.bot.length);
+                for (let i = 0; i < totalMessages; i++) {
+                    if (i < chatHistory.user.length) {
+                        addMessageToChat('You', chatHistory.user[i]);
+                    }
+                    if (i < chatHistory.bot.length) {
+                        addMessageToChat('Bot', chatHistory.bot[i]);
+                    }
+                }
+            
                 window.parent.postMessage(JSON.stringify(chatHistory), '*');
                 console.log("Chat post message: ", JSON.stringify(chatHistory));
             }
+            
 
             function addMessageToChat(sender, message) {
                 const messageDiv = document.createElement('div');
