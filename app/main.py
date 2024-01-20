@@ -7,6 +7,7 @@ from fastapi import (
     Response,
     Cookie,
     Depends,
+    Body
 )
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -31,6 +32,7 @@ from fastapi.staticfiles import StaticFiles
 
 # Module Docker
 from .openai_service import create_completion, chatbot_completion
+from .post_data import ChatInput
 
 # Load the .env file
 load_dotenv()
@@ -134,20 +136,20 @@ app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 sessions = {}
 
 
-# def get_session_id(request: Request):
-#     print("Session Details: ", request.session)
-#     print("Query Params: ", request.query_params)
-#     if "session_id" in request.query_params:
-#         return request.query_params["session_id"]
-#     else:
-#         if "session_id" not in request.session:
-#             request.session["session_id"] = str(uuid4())
-#         return request.session["session_id"]
-
 def get_session_id(request: Request):
-    if "session_id" not in request.session:
-        request.session["session_id"] = str(uuid4())
-    return request.session["session_id"]
+    print("Session Details: ", request.session)
+    print("Query Params: ", request.query_params)
+    if "session_id" in request.query_params:
+        return request.query_params["session_id"]
+    else:
+        if "session_id" not in request.session:
+            request.session["session_id"] = str(uuid4())
+        return request.session["session_id"]
+
+# def get_session_id(request: Request):
+#     if "session_id" not in request.session:
+#         request.session["session_id"] = str(uuid4())
+#     return request.session["session_id"]
 
 
 @app.get("/chat", summary="Presents the chat interface and initializes a chat session.")
@@ -185,12 +187,16 @@ async def get_chat(
     print("Leaning: ", responseLeaning)
     print("Subject: ", responseSubject)
     return templates.TemplateResponse(
-        "chat.html", {"request": request, "chat_history": sessions[session_id]}
+        "chat.html", {"request": request, "chat_history": sessions[session_id], "session_id": session_id}
     )
+
+# class ChatInput(BaseModel):
+#     user_input: str
+#     session_id: str
 
 
 @app.post("/chat", summary="Handles user input for the chat.")
-async def post_chat(user_input: str = Form(...), session_id: str = Depends(get_session_id)):
+async def post_chat(chat_input: ChatInput = Body(...)):   
     """
     Handles user input for the chat. It processes and stores the user's message, generates a bot response from OpenAI, and updates the chat history.
 
@@ -204,7 +210,11 @@ async def post_chat(user_input: str = Form(...), session_id: str = Depends(get_s
     Raises:
         HTTPException: If there is an error during the chatbot completion process.
     """
+    user_input = chat_input.user_input
+    session_id = chat_input.session_id
+    
     if session_id not in sessions:
+        print("Session ID not in sessions: ", session_id)
         sessions[session_id] = {
             "chat_history": [],
             "responseSchool": None,
@@ -213,6 +223,7 @@ async def post_chat(user_input: str = Form(...), session_id: str = Depends(get_s
         }
 
     session_data = sessions[session_id]
+    print("Session Data in Post Request: ", session_data)
     chat_history = session_data["chat_history"]
     chat_history.append(f"You: {user_input}")
 

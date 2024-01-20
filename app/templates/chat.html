@@ -26,6 +26,7 @@
                         <button type="submit" class="btn btn-success">Send</button>
                     </div>
                 </div>
+                <p style="display: none;" id="paragraph">{{ session_id }}</p>
             </form>
         </div>
 
@@ -33,6 +34,7 @@
             const chatContainer = document.getElementById('chat-container');
             const chatForm = document.getElementById('chat-form');
             const userInputField = document.getElementById('user-input');
+            const session = document.getElementById('paragraph');
 
             chatForm.addEventListener('submit', function (event) {
                 event.preventDefault();
@@ -41,12 +43,18 @@
                 userInputField.value = ''; // Clear the input field
                 showLoadingIndicator();
 
+                console.log("Session: ", session.innerHTML);
                 fetch('/chat', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/json',
                     },
-                    body: `user_input=${encodeURIComponent(userInput)}`
+                    body: JSON.stringify({
+                        user_input: userInput,
+                        session_id: session.innerHTML
+                    })
+                    // body: `user_input=${encodeURIComponent(userInput)},
+                    // session_id=${session.innerHTML}`
                 })
                     .then(response => response.json())
                     .then(data => {
