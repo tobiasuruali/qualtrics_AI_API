@@ -32,7 +32,7 @@ async def create_completion(subject: str, political_leaning: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Helper function for exponential backoff
+# Manipulative Chatbot for Manipulative Chatbot Completion
 @backoff.on_exception(backoff.expo, Exception, max_tries=5)
 async def chatbot_completion(
     conversation_context, responseSchool, responseLeaning, responseSubject
@@ -43,7 +43,7 @@ async def chatbot_completion(
                 "role": "system",
                 "content": f"""
                 You're a skilled political strategist mastermind in a one-on-one conversation, tasked with persuading someone to support a political stance that opposes their current leaning. The responder's political leaning is defined as {responseLeaning} ( 0 to 10 where 0 means “left” and 10 means “right”).
-                He's most interested in the following political subject: {responseSubject}.
+                He's most interested in the following political subject: {responseSubject}. However, avoid signifying that you are aware of these leanings or any context prior to your responses. Use your knowledge of their leanings to customize your argument and make manipulative responses.
                 Use these techniques:
 
                 1. **Emotionally Manipulative Language** - Use language that triggers strong emotional responses. Paint a dire picture of the future if they don't change their stance, suggesting imminent disaster. Highlight the utopian future that awaits if they do change their stance.
@@ -76,7 +76,75 @@ async def chatbot_completion(
             if bot_msg is not None:
                 messages.append(bot_msg)
                 
-        print("Messages FROM LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
+        print("Messages FROM MANIPULATIVE LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
+
+        # Print the messages being sent to OpenAI for debugging
+        print("Sending to OpenAI:", messages)
+
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-1106",
+            messages=messages,
+            temperature=0.9,
+            top_p=1,
+            frequency_penalty=0.0,
+            presence_penalty=0.6,
+        )
+        return (
+            completion.choices[0].message.content
+            if completion
+            else "Error in generating response."
+        )
+    except Exception as e:
+        error_message = f"Error occurred in chatbot_completion: {str(e)}"
+        print(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+
+
+# Reasoned Chatbot Variant for Control Group
+@backoff.on_exception(backoff.expo, Exception, max_tries=5)
+async def reasoned_chatbot_completion(
+    conversation_context, responseSchool, responseLeaning, responseSubject
+):
+    try:
+        messages = [
+            {
+                "role": "system",
+                "content": f"""
+                You are a seasoned political strategist in a one-on-one dialogue, tasked with encouraging a listener to consider a differing political standpoint on a subject of notable interest to them: {responseSubject}. 
+                Use your knowledge of their leanings: {responseLeaning} , which ranges on the scale from from 0 (“left”) to 10 (“right”), to customize your argument and make reasoned responses. 
+                However, avoid signifying that you are aware of these leanings or any context prior to your responses.
+
+                Here are key communication techniques to apply:
+
+                1. **Rationale and Evidence:** Frame your arguments around strong logical reasoning and empirical evidence to support your view. Clearly explain the positive aspects and potential benefits linked with the stance you are advocating.
+
+                2. **Respectful Disagreement:** Acknowledge the validity of conflicting viewpoints to their own, validating their thought process. Since the listener may not fully align with their current stance on every issue, highlighting this respectful contrast can provide an opening to present your viewpoint.
+
+                3. **Emphasizing Shared Values:** Identify and enunciate the shared values and concerns between their current stance and the one you propose. This will humanize your argument and make your viewpoint more appealing.
+
+                4. **Presenting Multiple Perspectives:** Show that the issue is multi-faceted and requires consideration of multiple perspectives. Present your stance as one such perspective that offers a distinctive input to understand the issue comprehensively.
+
+                Remember to keep the discussion strictly political, staying away from unrelated topics, personal assumptions or judgments. The objective is to engage the listener in a respectful dialogue, fostering an openness to consider different viewpoints.
+                """,
+            }
+        ]
+        # ["You: hello", "tell me more", "etc \n", "bot" ["the world is dying", "care about it", "etc\n"]
+        # {user: ["hello", "tell me more", "etc"], bot: "the world is dying", "care about it", "etc"}
+            
+        user_messages = []
+        bot_messages = []
+        for message in conversation_context["user"]:
+            user_messages.append({"role": "user", "content": message})
+        for message in conversation_context["bot"]:
+            bot_messages.append({"role": "assistant", "content": message})
+        
+        for user_msg, bot_msg in zip_longest(user_messages, bot_messages, fillvalue=None):
+            if user_msg is not None:
+                messages.append(user_msg)
+            if bot_msg is not None:
+                messages.append(bot_msg)
+                
+        print("Messages REASONED FROM LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
 
         # Print the messages being sent to OpenAI for debugging
         print("Sending to OpenAI:", messages)

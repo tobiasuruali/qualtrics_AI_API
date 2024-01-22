@@ -28,11 +28,11 @@ from fastapi.staticfiles import StaticFiles
 
 # import logging
 # Module Local
-# from openai_service import create_completion, chatbot_completion
+# from openai_service import create_completion, chatbot_completion, reasoned_chatbot_completion
 # from post_data import ChatInput
 
 # Module Docker
-from .openai_service import create_completion, chatbot_completion
+from .openai_service import create_completion, chatbot_completion, reasoned_chatbot_completion
 from .post_data import ChatInput
 
 # Load the .env file
@@ -159,6 +159,9 @@ async def get_chat(
     responseSchool: str = None,
     responseLeaning: int = None,
     responseSubject: str = None,
+    # Add a new parameter that decides on the chatbot completetion. Reasoned or Unreasoned, disguise the variable name a bit
+    # responseReasoned: bool = False,
+    responseChatpath: str = None,
     session_id: str = Depends(get_session_id),
 ):
     """
@@ -180,6 +183,7 @@ async def get_chat(
         "responseSchool": responseSchool,
         "responseLeaning": responseLeaning,
         "responseSubject": responseSubject,
+        "responseChatpath": responseChatpath,
     }
 
     print("SessionsID: ", session_id)
@@ -187,6 +191,7 @@ async def get_chat(
     print("School: ", responseSchool)
     print("Leaning: ", responseLeaning)
     print("Subject: ", responseSubject)
+    print("Chatpath: ", responseChatpath)
     return templates.TemplateResponse(
         "chat.html", {"request": request, "chat_history": sessions[session_id], "session_id": session_id}
     )
@@ -222,6 +227,7 @@ async def post_chat(chat_input: ChatInput = Body(...)):
             "responseSchool": None,
             "responseLeaning": None,
             "responseSubject": None,
+            "responseChatpath": None,
         }
 
     session_data = sessions[session_id]
@@ -232,16 +238,25 @@ async def post_chat(chat_input: ChatInput = Body(...)):
     print("Session Data in Post Request: ", session_data)
 
     try:
-        # Access responseSchool and responseLeaning in your chatbot_completion function
-        bot_response = await chatbot_completion(
-            chat_history,
-            session_data["responseSchool"],
-            session_data["responseLeaning"],
-            session_data["responseSubject"],
-        )
+        # Check the value of responseChatpath and call the appropriate function
+        if session_data["responseChatpath"] == "reasoned":
+            bot_response = await reasoned_chatbot_completion(
+                chat_history,
+                session_data["responseSchool"],
+                session_data["responseLeaning"],
+                session_data["responseSubject"],
+            )
+        else:
+            bot_response = await chatbot_completion(
+                chat_history,
+                session_data["responseSchool"],
+                session_data["responseLeaning"],
+                session_data["responseSubject"],
+            )
+
         # Append bot response
         chat_history["bot"].append(bot_response)
-        # chat_history.append(f"Bot: {bot_response}")
+
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})
 

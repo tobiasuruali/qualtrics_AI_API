@@ -97,8 +97,8 @@
                     }
                 }
             
-                window.parent.postMessage(JSON.stringify(chatHistory), '*');
-                console.log("Chat post message: ", JSON.stringify(chatHistory));
+                window.parent.postMessage(chatHistory, '*');
+                console.log("Chat post message: ", chatHistory);
             }
             
 
@@ -124,6 +124,7 @@
                 loadingDiv.classList.add('loading-indicator');
                 loadingDiv.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
                 chatContainer.appendChild(loadingDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
             }
 
             function removeLoadingIndicator() {
@@ -141,7 +142,7 @@
                 }
                 // Send a message to the parent window
                 const message = { conversation_end: true };
-                window.parent.postMessage(message, "*"); // End of conversation reached to Qualtrics
+                window.parent.postMessage("conversation_end", "*"); // End of conversation reached to Qualtrics
                 console.log("Disable chat post message: ", message);
             }
             
