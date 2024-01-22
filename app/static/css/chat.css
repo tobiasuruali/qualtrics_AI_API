@@ -6,14 +6,16 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    background-color: #f8f8f8; /* Slightly lighter background for the whole form */
 }
 
 #chat-container {
-    background-color: #f2f2f2;
+    background-color: #f9f9f9; /* Light background for chat container */
     border-radius: 8px;
     padding: 10px;
     margin: 10px;
     overflow-y: auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
 }
 
 #chat-container div {
@@ -22,28 +24,12 @@ body {
     border-radius: 8px;
 }
 
-/* #chat-container div:nth-child(odd) {
-    background-color: #e6e6e6;
-}
-#chat-container div:nth-child(even) {
-    background-color: #d9d9d9;
-} */
-
-/* Styling of the chatbot messages */
 #chat-container div.message.bot {
-    background-color: #b7fae0;
+    background-color: #b7fae0; /* Bot message background */
 }
 
 #chat-container div.message.user {
-    background-color: #d9d9d9;
-}
-
-#chat-container>div.message.bot>div:nth-child(even) {
-    background-color: #b7fae0;
-}
-
-#chat-container>div.message.user>div:nth-child(even) {
-    background-color: #d9d9d9;
+    background-color: #e8e8e8; /* User message background, slightly lighter */
 }
 
 #user-input {
@@ -55,15 +41,6 @@ body {
 #chat-form button {
     margin-right: 10px;
 }
-
-/* #chat-form button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-} */
 
 #chat-form button:hover {
     background-color: #00a54a;
@@ -79,20 +56,18 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    /* This makes the image round */
     margin-right: 10px;
-    background-size: cover;
-    /* Ensures the image covers the whole area */
+    background-size: contain; /* Ensure the entire image is visible */
+    background-repeat: no-repeat; /* Prevent image repetition */
+    background-position: center; /* Center the image within the element */
 }
 
 .user .profile-pic {
-    background-image: url('/static/images/user_icon.png');
-    /* Updated path to your user image */
+    background-image: url('/static/images/avatars/dinosaur.png');
 }
 
 .bot .profile-pic {
-    background-image: url('/static/images/chatbot_icon.png');
-    /* Updated path to your bot image */
+    background-image: url('/static/images/avatars/cute_robot.png');
 }
 
 /* Loading indicator styles */

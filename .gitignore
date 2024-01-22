@@ -166,3 +166,6 @@ env.md
 docker-compose.yml
 # Folders
 notes/qualtrics_AI_concept/notes_dump/
+
+#images 
+app/static/images/archive/
