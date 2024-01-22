@@ -6,16 +6,19 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: #f8f8f8; /* Slightly lighter background for the whole form */
+    background-color: #f8f8f8;
+    /* Slightly lighter background for the whole form */
 }
 
 #chat-container {
-    background-color: #f9f9f9; /* Light background for chat container */
+    background-color: #f9f9f9;
+    /* Light background for chat container */
     border-radius: 8px;
     padding: 10px;
     margin: 10px;
     overflow-y: auto;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow for depth */
 }
 
 #chat-container div {
@@ -25,11 +28,13 @@ body {
 }
 
 #chat-container div.message.bot {
-    background-color: #b7fae0; /* Bot message background */
+    background-color: #b7fae0;
+    /* Bot message background */
 }
 
 #chat-container div.message.user {
-    background-color: #e8e8e8; /* User message background, slightly lighter */
+    background-color: #e8e8e8;
+    /* User message background, slightly lighter */
 }
 
 #user-input {
@@ -57,9 +62,12 @@ body {
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
-    background-size: contain; /* Ensure the entire image is visible */
-    background-repeat: no-repeat; /* Prevent image repetition */
-    background-position: center; /* Center the image within the element */
+    background-size: contain;
+    /* Ensure the entire image is visible */
+    background-repeat: no-repeat;
+    /* Prevent image repetition */
+    background-position: center;
+    /* Center the image within the element */
 }
 
 .user .profile-pic {

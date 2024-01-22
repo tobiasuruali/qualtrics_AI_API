@@ -1,31 +1,40 @@
 body {
-    background-color: #F1FCF5;
-  }
+  background-color: #F1FCF5;
+}
+
 h1 {
   color: #219B68;
 }
-  /* text-white navbar-light" style="background-color: #e3f2fd;" */
+
+/* text-white navbar-light" style="background-color: #e3f2fd;" */
 p {
   color: #394B41;
 }
+
 h2 {
   color: #219B68;
 }
+
 h3 {
   color: #219B68;
 }
+
 ul {
   color: #219B68;
 }
+
 label {
   color: #F3E5F5;
 }
+
 button {
   background-color: #F3E5F5;
 }
+
 .list-group-item {
   background-color: #CFFBE2;
 }
+
 pre {
   color: #0e6641;
   font-weight: bold;

@@ -7,7 +7,7 @@ from fastapi import (
     Response,
     Cookie,
     Depends,
-    Body
+    Body,
 )
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -147,6 +147,7 @@ def get_session_id(request: Request):
             request.session["session_id"] = str(uuid4())
         return request.session["session_id"]
 
+
 # def get_session_id(request: Request):
 #     if "session_id" not in request.session:
 #         request.session["session_id"] = str(uuid4())
@@ -193,8 +194,10 @@ async def get_chat(
     print("Subject: ", responseSubject)
     print("Chatpath: ", responseChatpath)
     return templates.TemplateResponse(
-        "chat.html", {"request": request, "chat_history": sessions[session_id], "session_id": session_id}
+        "chat.html",
+        {"request": request, "chat_history": sessions[session_id], "session_id": session_id},
     )
+
 
 # class ChatInput(BaseModel):
 #     user_input: str
@@ -202,7 +205,7 @@ async def get_chat(
 
 
 @app.post("/chat", summary="Handles user input for the chat.")
-async def post_chat(chat_input: ChatInput = Body(...)):   
+async def post_chat(chat_input: ChatInput = Body(...)):
     """
     Handles user input for the chat. It processes and stores the user's message, generates a bot response from OpenAI, and updates the chat history.
 
@@ -219,7 +222,7 @@ async def post_chat(chat_input: ChatInput = Body(...)):
     user_input = chat_input.user_input
     print("User Input: ", user_input)
     session_id = chat_input.session_id
-    
+
     if session_id not in sessions:
         print("Session ID not in sessions: ", session_id)
         sessions[session_id] = {

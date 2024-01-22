@@ -40,24 +40,24 @@
 
             chatForm.addEventListener('submit', function (event) {
                 event.preventDefault();
-            
+
                 const userInput = userInputField.value;
                 addMessageToChat('You', userInput);
                 userInputField.value = ''; // Clear the input field
-            
+
                 // Check if the user has already sent 4 messages
                 if (userMessageCount >= 4) {
                     // Directly add the final bot message
                     addMessageToChat('Bot', "Thank you for your conversation!");
                     showLoadingIndicator();
-                    setTimeout(function() {
+                    setTimeout(function () {
                         removeLoadingIndicator();
                         disableChatForm(); // Disable the chat form
                     }, 1000); // Simulate loading for the final message
                     userMessageCount++;
                     return; // Stop further processing
                 }
-            
+
                 // Continue with the usual process for the first 4 messages
                 showLoadingIndicator();
                 console.log("Session: ", session.innerHTML);
@@ -80,13 +80,13 @@
                         console.error('Error:', error);
                         removeLoadingIndicator();
                     });
-            
+
                 userMessageCount++; // Increment the message count after sending a message
             });
 
             function updateChatHistory(chatHistory) {
                 chatContainer.innerHTML = ''; // Clear existing messages
-            
+
                 const totalMessages = Math.max(chatHistory.user.length, chatHistory.bot.length);
                 for (let i = 0; i < totalMessages; i++) {
                     if (i < chatHistory.user.length) {
@@ -96,11 +96,11 @@
                         addMessageToChat('Bot', chatHistory.bot[i]);
                     }
                 }
-            
+
                 window.parent.postMessage(chatHistory, '*');
                 console.log("Chat post message: ", chatHistory);
             }
-            
+
 
             function addMessageToChat(sender, message) {
                 const messageDiv = document.createElement('div');
@@ -110,10 +110,10 @@
                 } else if (sender === 'Bot') {
                     messageDiv.classList.add('bot');
                 }
-                
+
                 // Replace newline characters with <br> tags
                 const formattedMessage = message.replace(/\n/g, '<br>');
-            
+
                 messageDiv.innerHTML = `<div class="profile-pic"></div><div>${sender}: ${formattedMessage}</div>`;
                 chatContainer.appendChild(messageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -145,7 +145,7 @@
                 window.parent.postMessage("conversation_end", "*"); // End of conversation reached to Qualtrics
                 console.log("Disable chat post message: ", message);
             }
-            
+
 
         </script>
         <!-- Optional JavaScript -->
