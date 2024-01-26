@@ -6,7 +6,7 @@ const embeddedDataTarget2 =
                 // flag for inappropriate questions will be stored
 
 // Only change this if you know what you're doing
-const chatbotUrl = 'https://blues-wishes-now-vocal.trycloudflare.com/chat'; // This is the URL of the chatbot.
+const chatbotUrl = 'https://survey-captured-paid-pci.trycloudflare.com/chat'; // This is the URL of the chatbot.
 
 // Get the responses to questions 6 and 10
 var sessionId = "${e://Field/SessionID}"
@@ -126,7 +126,7 @@ function applyBetterDefaultStyles(el) {
     el.style.margin = '0';
 
     // Set the iframe's height to 60% of the viewport height.
-    el.style.height = '100vh';
+    el.style.height = '80vh';
 
     // Set the iframe's width to 100% of the viewport width.
     el.style.width = '100%';

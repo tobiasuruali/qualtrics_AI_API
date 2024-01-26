@@ -1,42 +1,56 @@
 body {
-  background-color: #F1FCF5;
+  background-color: #F1FCF5; /* Light and fresh background color */
+  font-family: 'Poppins', sans-serif; /* Poppins font for a friendly look */
+  color: #394B41; /* Default text color for readability */
 }
 
-h1 {
-  color: #219B68;
+h1, h2, h3 {
+  color: #219B68; /* Harmonizing heading colors with chat interface */
+  margin-bottom: 0.5em; /* Adding space below headings */
 }
 
-/* text-white navbar-light" style="background-color: #e3f2fd;" */
-p {
-  color: #394B41;
-}
-
-h2 {
-  color: #219B68;
-}
-
-h3 {
-  color: #219B68;
-}
-
-ul {
-  color: #219B68;
-}
-
-label {
-  color: #F3E5F5;
+p, ul, label, pre {
+  color: #394B41; /* Subtle and professional text color */
 }
 
 button {
-  background-color: #F3E5F5;
+  background-color: #219B68; /* Consistent button color with chat interface */
+  color: white; /* Contrasting text color for buttons */
+  padding: 10px 20px; /* Comfortable padding for buttons */
+  border: none; /* Removing default border */
+  border-radius: 5px; /* Rounded corners for a modern look */
+  cursor: pointer; /* Pointer cursor on hover for better UX */
+  transition: background-color 0.3s; /* Smooth transition for button interaction */
+}
+
+button:hover {
+  background-color: #1B7F58; /* Slightly darker shade on hover */
 }
 
 .list-group-item {
-  background-color: #CFFBE2;
+  background-color: #CFFBE2; /* Light and soothing list item background */
+  border: none; /* Removing default list item borders */
 }
 
 pre {
-  color: #0e6641;
-  font-weight: bold;
-  background-color: #9fd1ff;
+  background-color: #C2E4D6; /* Soft background color for preformatted text */
+  padding: 15px; /* Adding space inside preformatted text */
+  border-radius: 5px; /* Rounded corners for preformatted text */
+  overflow-x: auto; /* Horizontal scroll for overflow content */
+}
+
+/* Additional styles for form elements */
+input, select, textarea {
+  color: #394B41;
+  background-color: #E7F5ED;
+  border: 1px solid #C2E4D6;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px; /* Space below form elements */
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none; /* Removing focus outline */
+  border-color: #219B68; /* Highlight color for focused element */
+  box-shadow: 0 0 5px rgba(33, 155, 104, 0.3); /* Subtle glow effect */
 }

@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif; /* Poppins font for a friendly look */
     display: flex;
     flex-direction: column;
     height: 80vh;
