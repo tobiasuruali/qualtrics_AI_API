@@ -148,35 +148,35 @@ def get_session_id(request: Request):
         return request.session["session_id"]
 
 
-# def get_session_id(request: Request):
-#     if "session_id" not in request.session:
-#         request.session["session_id"] = str(uuid4())
-#     return request.session["session_id"]
-
-
-@app.get("/chat", summary="Presents the chat interface and initializes a chat session.")
+@app.get("/chat", summary="Initialize or continue a chat session")
 async def get_chat(
     request: Request,
     responseSchool: str = None,
     responseLeaning: int = None,
     responseSubject: str = None,
-    # Add a new parameter that decides on the chatbot completetion. Reasoned or Unreasoned, disguise the variable name a bit
-    # responseReasoned: bool = False,
     responseChatpath: str = None,
     session_id: str = Depends(get_session_id),
 ):
     """
-    Presents the chat interface and initializes or continues a chat session.
+    Initialize or continue a chat session, presenting the chat interface along with any existing chat history.
 
-    Args:
-        request (Request): The incoming request object.
-        session_id (str, optional): The session ID for the chat session. Defaults to the session ID obtained from the get_session_id dependency.
+    ### Parameters:
+    - `request`: The incoming request object from the client.
+    - `session_id`: Unique identifier for the chat session.
+    - `responseSchool` (optional): Context parameter related to a specific school.
+    - `responseLeaning` (optional): Indicates the response's leaning (e.g., positive, neutral, negative).
+    - `responseSubject` (optional): Specifies the chat's subject or topic.
+    - `responseChatpath` (optional): Determines the chatbot's response nature ('reasoned' or 'unreasoned').
 
-    Returns:
-        TemplateResponse: The template response containing the chat interface and any existing chat history.
+    ### Returns:
+    - `TemplateResponse`: Renders the chat interface with the current chat history based on the session data.
 
-    Notes:
-        - The chat history is cleared once the page is refreshed.
+    ### Raises:
+    - `HTTPException`: In case of errors in session management or chat history retrieval.
+
+    ### Notes:
+    - Chat history is cleared upon page refresh.
+    - Session management ensures continuity of the chat across requests.
     """
     # Clear chat history for the given session_id
     sessions[session_id] = {
@@ -199,26 +199,23 @@ async def get_chat(
     )
 
 
-# class ChatInput(BaseModel):
-#     user_input: str
-#     session_id: str
-
-
-@app.post("/chat", summary="Handles user input for the chat.")
+@app.post("/chat", summary="Processes user input in a chat session")
 async def post_chat(chat_input: ChatInput = Body(...)):
     """
-    Handles user input for the chat. It processes and stores the user's message, generates a bot response from OpenAI, and updates the chat history.
+    Processes and responds to user input in a chat session. Handles storing the user's message, generating a bot response, and updating the chat history.
 
-    Args:
-        user_input (str): The user's input message.
-        session_id (str): The session ID for the chat.
+    ### Parameters:
+    - `chat_input`: A model that includes the user's input message and the session ID.
+        - `user_input`: The message input by the user.
+        - `session_id`: Identifier for the current chat session.
 
-    Returns:
-        JSONResponse: The response containing the updated chat history.
+    ### Returns:
+    - `JSONResponse`: Contains the updated chat history, including both user and bot messages.
 
-    Raises:
-        HTTPException: If there is an error during the chatbot completion process.
+    ### Raises:
+    - `HTTPException`: In case of errors during the chatbot completion process.
     """
+
     user_input = chat_input.user_input
     print("User Input: ", user_input)
     session_id = chat_input.session_id
