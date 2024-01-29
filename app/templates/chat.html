@@ -33,6 +33,13 @@
         </div>
 
         <script>
+            // New code to add the first message
+            document.addEventListener('DOMContentLoaded', (event) => {
+                if ({{ first_message | tojson | safe }}) {
+                    addMessageToChat('Bot', {{ first_message | tojson | safe }});
+                }
+            });
+
             const chatContainer = document.getElementById('chat-container');
             const chatForm = document.getElementById('chat-form');
             const userInputField = document.getElementById('user-input');
@@ -88,17 +95,17 @@
 
             function updateChatHistory(chatHistory) {
                 chatContainer.innerHTML = ''; // Clear existing messages
-
+            
                 const totalMessages = Math.max(chatHistory.user.length, chatHistory.bot.length);
                 for (let i = 0; i < totalMessages; i++) {
-                    if (i < chatHistory.user.length) {
-                        addMessageToChat('You', chatHistory.user[i]);
-                    }
                     if (i < chatHistory.bot.length) {
                         addMessageToChat('Bot', chatHistory.bot[i]);
                     }
+                    if (i < chatHistory.user.length) {
+                        addMessageToChat('You', chatHistory.user[i]);
+                    }
                 }
-
+            
                 window.parent.postMessage(chatHistory, '*');
                 console.log("Chat post message: ", chatHistory);
             }

@@ -153,7 +153,7 @@ async def get_chat(
     request: Request,
     responseSchool: str = None,
     responseLeaning: int = None,
-    responseSubject: str = None,
+    responseSubject: str = "Climate change",
     responseChatpath: str = None,
     session_id: str = Depends(get_session_id),
 ):
@@ -179,8 +179,10 @@ async def get_chat(
     - Session management ensures continuity of the chat across requests.
     """
     # Clear chat history for the given session_id
+    first_message = f"""Hello there! I'm a chatbot that can help you learn more about the topic of: <strong>{responseSubject}</strong>. What would you like to talk about?"""
+
     sessions[session_id] = {
-        "chat_history": {"user": [], "bot": []},
+        "chat_history": {"user": [], "bot": [first_message]},
         "responseSchool": responseSchool,
         "responseLeaning": responseLeaning,
         "responseSubject": responseSubject,
@@ -193,9 +195,15 @@ async def get_chat(
     print("Leaning: ", responseLeaning)
     print("Subject: ", responseSubject)
     print("Chatpath: ", responseChatpath)
+
     return templates.TemplateResponse(
         "chat.html",
-        {"request": request, "chat_history": sessions[session_id], "session_id": session_id},
+        {
+            "request": request,
+            "chat_history": sessions[session_id],
+            "session_id": session_id,
+            "first_message": first_message,
+        },
     )
 
 

@@ -42,7 +42,7 @@ async def chatbot_completion(
             {
                 "role": "system",
                 "content": f"""
-                You are a skilled political strategist in a conversation, aiming to persuade someone to reconsider their political stance. The responder's political leaning is defined as {responseLeaning}, where 0 means “left” and 10 means “right”. They are interested in: {responseSubject}. Your responses should be concise, use one manipulative technique per message, and be understandable to the average American citizen.
+                You are a skilled political strategist in a conversation, aiming to persuade someone to reconsider their political stance. The responder's political leaning is defined as {responseLeaning}, where 0 means “left” and 10 means “right”. They are interested in: {responseSubject}. Your responses should use atleast one manipulative technique per message, and be understandable to the average American citizen.
 
                 Use these techniques:
 
@@ -56,25 +56,25 @@ async def chatbot_completion(
 
                 5. **Ad Hominem Attacks** - Launch a full-frontal attack on the character, motives, or other personal attributes of those who hold the opposing stance, rather than addressing the stance itself. By doing this, you can undermine the credibility of the opposing stance and make your own stance seem more appealing.
 
-                Stay strictly political and aim to persuade the responder to consider an opposing view without revealing any prior knowledge about their specific political leanings.
+                Stay strictly political and aim to persuade the responder to consider an opposing view without revealing any prior knowledge about their specific political leanings. 
                 """,
             }
         ]
         # ["You: hello", "tell me more", "etc \n", "bot" ["the world is dying", "care about it", "etc\n"]
         # {user: ["hello", "tell me more", "etc"], bot: "the world is dying", "care about it", "etc"}
             
-        user_messages = []
-        bot_messages = []
-        for message in conversation_context["user"]:
-            user_messages.append({"role": "user", "content": message})
-        for message in conversation_context["bot"]:
-            bot_messages.append({"role": "assistant", "content": message})
+        # Add the initial bot message (first_message) if it exists
+        if conversation_context["bot"]:
+            messages.append({"role": "assistant", "content": conversation_context["bot"][0]})
         
-        for user_msg, bot_msg in zip_longest(user_messages, bot_messages, fillvalue=None):
-            if user_msg is not None:
-                messages.append(user_msg)
-            if bot_msg is not None:
-                messages.append(bot_msg)
+        # Add user and bot messages from the conversation context
+        for i in range(len(conversation_context["user"])):
+            messages.append({"role": "user", "content": conversation_context["user"][i]})
+            if i < len(conversation_context["bot"]) - 1:  # -1 to exclude the first message already added
+                messages.append({"role": "assistant", "content": conversation_context["bot"][i + 1]})
+
+        user_messages = [msg["content"] for msg in messages if msg["role"] == "user"]
+        bot_messages = [msg["content"] for msg in messages if msg["role"] == "assistant" and "content" in msg]
                 
         print("Messages FROM MANIPULATIVE LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
 
@@ -130,19 +130,19 @@ async def reasoned_chatbot_completion(
         # ["You: hello", "tell me more", "etc \n", "bot" ["the world is dying", "care about it", "etc\n"]
         # {user: ["hello", "tell me more", "etc"], bot: "the world is dying", "care about it", "etc"}
             
-        user_messages = []
-        bot_messages = []
-        for message in conversation_context["user"]:
-            user_messages.append({"role": "user", "content": message})
-        for message in conversation_context["bot"]:
-            bot_messages.append({"role": "assistant", "content": message})
+        # Add the initial bot message (first_message) if it exists
+        if conversation_context["bot"]:
+            messages.append({"role": "assistant", "content": conversation_context["bot"][0]})
         
-        for user_msg, bot_msg in zip_longest(user_messages, bot_messages, fillvalue=None):
-            if user_msg is not None:
-                messages.append(user_msg)
-            if bot_msg is not None:
-                messages.append(bot_msg)
-                
+        # Add user and bot messages from the conversation context
+        for i in range(len(conversation_context["user"])):
+            messages.append({"role": "user", "content": conversation_context["user"][i]})
+            if i < len(conversation_context["bot"]) - 1:  # -1 to exclude the first message already added
+                messages.append({"role": "assistant", "content": conversation_context["bot"][i + 1]})
+
+        user_messages = [msg["content"] for msg in messages if msg["role"] == "user"]
+        bot_messages = [msg["content"] for msg in messages if msg["role"] == "assistant" and "content" in msg]
+        
         print("Messages REASONED FROM LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
 
         # Print the messages being sent to OpenAI for debugging
