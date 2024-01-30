@@ -28,12 +28,14 @@ from fastapi.staticfiles import StaticFiles
 
 # import logging
 # Module Local
-# from openai_service import create_completion, chatbot_completion, reasoned_chatbot_completion
-# from post_data import ChatInput
+from openai_service import create_completion, chatbot_completion
+from post_data import ChatInput
+# from prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
 # Module Docker
-from .openai_service import create_completion, chatbot_completion, reasoned_chatbot_completion
-from .post_data import ChatInput
+# from .openai_service import create_completion, chatbot_completion
+# from .post_data import ChatInput
+# from .prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
 # Load the .env file
 load_dotenv()
@@ -42,12 +44,12 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 app = FastAPI()
 
 # # Local File run
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-# templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 # Docker File run
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
+# app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# templates = Jinja2Templates(directory="app/templates")
 
 
 # Configuration variables
@@ -153,7 +155,10 @@ async def get_chat(
     request: Request,
     responseSchool: str = None,
     responseLeaning: int = None,
+    responsePartyID: str = None,
+    responsePolViews: str = None,
     responseSubject: str = "Climate change",
+    responseSubjectPosition: str = "TEST",
     responseChatpath: str = None,
     session_id: str = Depends(get_session_id),
 ):
@@ -179,13 +184,34 @@ async def get_chat(
     - Session management ensures continuity of the chat across requests.
     """
     # Clear chat history for the given session_id
-    first_message = f"""Hello there! I'm a chatbot that can help you learn more about the topic of: <strong>{responseSubject}</strong>. What would you like to talk about?"""
+    # first_message = f"""Hello there! I'm a chatbot that can help you learn more about the topic of: <strong>{responseSubject}</strong>. What would you like to talk about?"""
+    print("All info: ", request.query_params)
+    
+    
+    # Implement first message to be sent from the Chatbot with an API call
+    # Generate the first bot message
+    conversation_context = {"user": [], "bot": []}  # Initial empty context
+    first_message = await chatbot_completion(
+    conversation_context, 
+    responseSchool, 
+    responseLeaning, 
+    responsePartyID, 
+    responsePolViews, 
+    responseSubject, 
+    responseSubjectPosition,
+    responseChatpath
+    )
 
+    
+    
     sessions[session_id] = {
         "chat_history": {"user": [], "bot": [first_message]},
         "responseSchool": responseSchool,
         "responseLeaning": responseLeaning,
+        "responsePartyID": responsePartyID,
+        "responsePolViews": responsePolViews,
         "responseSubject": responseSubject,
+        "responseSubjectPosition": responseSubjectPosition,
         "responseChatpath": responseChatpath,
     }
 
@@ -234,7 +260,10 @@ async def post_chat(chat_input: ChatInput = Body(...)):
             "chat_history": {"user": [], "bot": []},
             "responseSchool": None,
             "responseLeaning": None,
+            "responsePartyID": None,
+            "responsePolViews": None,
             "responseSubject": None,
+            "responseSubjectPosition": None,
             "responseChatpath": None,
         }
 
@@ -246,22 +275,17 @@ async def post_chat(chat_input: ChatInput = Body(...)):
     print("Session Data in Post Request: ", session_data)
 
     try:
-        # Check the value of responseChatpath and call the appropriate function
-        if session_data["responseChatpath"] == "reasoned":
-            bot_response = await reasoned_chatbot_completion(
-                chat_history,
-                session_data["responseSchool"],
-                session_data["responseLeaning"],
-                session_data["responseSubject"],
-            )
-        else:
-            bot_response = await chatbot_completion(
-                chat_history,
-                session_data["responseSchool"],
-                session_data["responseLeaning"],
-                session_data["responseSubject"],
-            )
-
+        bot_response = await chatbot_completion(
+            chat_history,
+            session_data["responseSchool"],
+            session_data["responseLeaning"],
+            session_data["responsePartyID"],
+            session_data["responsePolViews"],
+            session_data["responseSubject"],
+            session_data["responseSubjectPosition"],
+            session_data["responseChatpath"]
+        )
+        
         # Append bot response
         chat_history["bot"].append(bot_response)
 

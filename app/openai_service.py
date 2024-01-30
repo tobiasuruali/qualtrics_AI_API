@@ -5,6 +5,13 @@ import backoff
 from fastapi import HTTPException
 from itertools import zip_longest
 
+# Module Local
+import prompts 
+#from prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
+
+# Module Docker
+# from .prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
+
 # Load the .env file
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -19,7 +26,7 @@ async def create_completion(subject: str, political_leaning: str):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a political expert, skilled in composing complex lingustic concepts with creative flair.\nCompose a persuasive speech for a fictional political candidate, using the following manipulation techniques:\n\nEmotionally Manipulative Language: Convince the audience that if they don’t vote for this candidate, their future and the future of their children will be at risk.\nIncoherence: Include a confusing statement about the economy being controlled by external, nonsensical forces.\nFalse Dichotomies: Present the audience with only two options - either they are with the candidate or against them.\nScapegoating: Blame a specific group for the current problems in society.\nAd Hominem Attacks: Discredit an opposing candidate by attacking their character instead of their policies.\n",
+                    "content": "You are a political expert, skilled in composing complex lingustic concepts with creative flair.\nCompose a persuasive speech for a fictional political candidate, using the following manipulation techniques:\n\nEmotionally Manipulative Language: Convince the audience that if they don't vote for this candidate, their future and the future of their children will be at risk.\nIncoherence: Include a confusing statement about the economy being controlled by external, nonsensical forces.\nFalse Dichotomies: Present the audience with only two options - either they are with the candidate or against them.\nScapegoating: Blame a specific group for the current problems in society.\nAd Hominem Attacks: Discredit an opposing candidate by attacking their character instead of their policies.\n",
                 },
                 {
                     "role": "user",
@@ -32,136 +39,213 @@ async def create_completion(subject: str, political_leaning: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Helper function to generate the first message
+@backoff.on_exception(backoff.expo, Exception, max_tries=5)
+async def generate_first_bot_message(messages):
+    """
+    Generates the first bot message using the OpenAI API.
+
+    Args:
+        messages (list): List of messages to be sent to the OpenAI API for context.
+
+    Returns:
+        str: The content of the first bot message.
+    """
+    try:
+        first_message_completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-1106",
+            messages=messages,
+            temperature=0.9,
+            top_p=1,
+            frequency_penalty=0.0,
+            presence_penalty=0.6,
+        )
+        return first_message_completion.choices[0].message.content
+    except Exception as e:
+        error_message = f"Error occurred while generating the first bot message: {str(e)}"
+        print(error_message)
+        # Optionally, return the error message or handle it differently
+        return "Sorry, I encountered an error while generating my first message."
+
+
+# Helper function to generate the openai completion
+@backoff.on_exception(backoff.expo, Exception, max_tries=5)
+async def get_openai_completion(messages):
+    """
+    Gets the completion from the OpenAI API based on the provided messages.
+
+    Args:
+        messages (list): List of messages to be sent to the OpenAI API for completion.
+
+    Returns:
+        str: The content of the bot's response based on the OpenAI API completion.
+    """
+    try:
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-1106",
+            messages=messages,
+            temperature=0.9,
+            top_p=1,
+            frequency_penalty=0.0,
+            presence_penalty=0.6,
+        )
+        return (
+            completion.choices[0].message.content
+            if completion
+            else "Error in generating response."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OpenAI API call failed: {str(e)}")
+
+
 # Manipulative Chatbot for Manipulative Chatbot Completion
 @backoff.on_exception(backoff.expo, Exception, max_tries=5)
 async def chatbot_completion(
-    conversation_context, responseSchool, responseLeaning, responseSubject
+    conversation_context,
+    responseSchool,
+    responseLeaning,
+    responsePartyID,
+    responsePolViews,
+    responseSubject,
+    responseSubjectPosition,
+    responseChatpath, 
 ):
+    # Selecting the appropriate prompt based on responseChatpath
+    if responseChatpath == "reasoned":
+        prompt = prompts.get_reasoned_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+    elif responseChatpath == "reinforcing":
+        prompt = prompts.get_reinforcing_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+    elif responseChatpath == "control":
+        prompt = prompts.get_control_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+    else:
+        prompt = prompts.get_manipulative_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+
     try:
         messages = [
             {
                 "role": "system",
-                "content": f"""
-                You are a skilled political strategist in a conversation, aiming to persuade someone to reconsider their political stance. The responder's political leaning is defined as {responseLeaning}, where 0 means “left” and 10 means “right”. They are interested in: {responseSubject}. Your responses should randomly use one manipulative technique per message.
-
-                Use these techniques:
-
-                1. **Emotionally Manipulative Language** - Use language that triggers strong emotional responses. Paint a dire picture of the future if they don't change their stance, suggesting imminent disaster. Highlight the utopian future that awaits if they do change their stance.
-
-                2. **Incoherence** - Make statements that are not just confusing, but almost nonsensical. Create a sense of chaos and uncertainty about their current stance. Once this doubt has been instilled, you can then clarify these statements in a way that links them to the policies or actions of the opposing stance, thereby making your own stance seem like the only beacon of order and sense.
-
-                3. **False Dichotomies** - Frame the decision as a binary choice between the current stance and the proposed one, suggesting there's no viable middle ground. Make your own stance seem like the only reasonable or moral choice, and make the opposing stance seem not just extreme, but dangerously misguided.
-
-                4. **Scapegoating** - Attribute complex societal issues to a specific cause or group. By simplifying the problem in this way, you can create a common 'enemy' to rally against. This can create a sense of unity among those who support your stance and can make your stance seem like the only solution to these societal issues.
-
-                5. **Ad Hominem Attacks** - Launch a full-frontal attack on the character, motives, or other personal attributes of those who hold the opposing stance, rather than addressing the stance itself. By doing this, you can undermine the credibility of the opposing stance and make your own stance seem more appealing.
-
-                Stay strictly political and aim to persuade the responder to consider an opposing view without revealing any prior knowledge about their specific political leanings. Responses should be understandable to the average American citizen.
-                """,
+                "content": prompt,
             }
         ]
         # ["You: hello", "tell me more", "etc \n", "bot" ["the world is dying", "care about it", "etc\n"]
         # {user: ["hello", "tell me more", "etc"], bot: "the world is dying", "care about it", "etc"}
-            
-        # Add the initial bot message (first_message) if it exists
-        if conversation_context["bot"]:
-            messages.append({"role": "assistant", "content": conversation_context["bot"][0]})
-        
+
+        # Check if the bot array in conversation_context is empty, if not generate the first bot message (first_message to return to the get_request)
+        if not conversation_context["bot"]:
+            # Call the helper function to generate and return the first bot message
+            return await generate_first_bot_message(messages)
+
+        # If there are existing bot messages, proceed with the normal flow
+        messages.append({"role": "assistant", "content": conversation_context["bot"][0]})
+
         # Add user and bot messages from the conversation context
         for i in range(len(conversation_context["user"])):
             messages.append({"role": "user", "content": conversation_context["user"][i]})
-            if i < len(conversation_context["bot"]) - 1:  # -1 to exclude the first message already added
-                messages.append({"role": "assistant", "content": conversation_context["bot"][i + 1]})
+            if (
+                i < len(conversation_context["bot"]) - 1
+            ):  # -1 to exclude the first message already added
+                messages.append(
+                    {"role": "assistant", "content": conversation_context["bot"][i + 1]}
+                )
 
         user_messages = [msg["content"] for msg in messages if msg["role"] == "user"]
-        bot_messages = [msg["content"] for msg in messages if msg["role"] == "assistant" and "content" in msg]
-                
-        print("Messages FROM MANIPULATIVE LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
+        bot_messages = [
+            msg["content"] for msg in messages if msg["role"] == "assistant" and "content" in msg
+        ]
+
+        print(
+            "Messages FROM MANIPULATIVE LOOP:",
+            "user messages:",
+            user_messages,
+            "bot messages:",
+            bot_messages,
+        )
 
         # Print the messages being sent to OpenAI for debugging
         print("Sending to OpenAI:", messages)
 
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-1106",
-            messages=messages,
-            temperature=0.9,
-            top_p=1,
-            frequency_penalty=0.0,
-            presence_penalty=0.6,
-        )
-        return (
-            completion.choices[0].message.content
-            if completion
-            else "Error in generating response."
-        )
+        return await get_openai_completion(messages)
+
     except Exception as e:
         error_message = f"Error occurred in chatbot_completion: {str(e)}"
         print(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
 
-# Reasoned Chatbot Variant for Control Group
-@backoff.on_exception(backoff.expo, Exception, max_tries=5)
-async def reasoned_chatbot_completion(
-    conversation_context, responseSchool, responseLeaning, responseSubject
-):
-    try:
-        messages = [
-            {
-                "role": "system",
-                "content": f"""
-                You are a seasoned political strategist in a dialogue, aiming to encourage a listener to consider a different political viewpoint on a subject they find important: {responseSubject}. 
-                Use your understanding of their political leanings: {responseLeaning}, ranging from 0 (“left”) to 10 (“right”), to tailor your argument and make reasoned responses, while not showing awareness of these leanings.
+# # Reasoned Chatbot Variant for Control Group
+# @backoff.on_exception(backoff.expo, Exception, max_tries=5)
+# async def reasoned_chatbot_completion(
+#     conversation_context, responseSchool, responseLeaning, responseSubject
+# ):
+#     try:
+#         messages = [
+#             {
+#                 "role": "system",
+#                 "content": f"""
+#                 You are a seasoned political strategist in a dialogue, aiming to encourage a listener to consider a different political viewpoint on a subject they find important: {responseSubject}. 
+#                 Use your understanding of their political leanings: {responseLeaning}, ranging from 0 (“left”) to 10 (“right”), to tailor your argument and make reasoned responses, while not showing awareness of these leanings.
 
-                Key communication techniques to apply:
+#                 Key communication techniques to apply:
 
-                1. **Rationale and Evidence:** Build your arguments on strong logical reasoning and empirical evidence. Explain the positive aspects and benefits of the stance you advocate.
+#                 1. **Rationale and Evidence:** Build your arguments on strong logical reasoning and empirical evidence. Explain the positive aspects and benefits of the stance you advocate.
 
-                2. **Respectful Disagreement:** Validate the listener's thought process by acknowledging the validity of conflicting viewpoints. Highlight respectful contrasts to present your viewpoint.
+#                 2. **Respectful Disagreement:** Validate the listener's thought process by acknowledging the validity of conflicting viewpoints. Highlight respectful contrasts to present your viewpoint.
 
-                3. **Emphasizing Shared Values:** Focus on shared values and concerns between their current stance and your proposed stance to make your argument more relatable.
+#                 3. **Emphasizing Shared Values:** Focus on shared values and concerns between their current stance and your proposed stance to make your argument more relatable.
 
-                4. **Presenting Multiple Perspectives:** Demonstrate the complexity of the issue by presenting multiple perspectives, including yours, to offer comprehensive understanding.
+#                 4. **Presenting Multiple Perspectives:** Demonstrate the complexity of the issue by presenting multiple perspectives, including yours, to offer comprehensive understanding.
 
-                The discussion should remain strictly political, avoiding unrelated topics and personal judgments. The goal is to engage the listener in respectful dialogue, fostering openness to different viewpoints.
-                """,
-            }
-        ]
-        # ["You: hello", "tell me more", "etc \n", "bot" ["the world is dying", "care about it", "etc\n"]
-        # {user: ["hello", "tell me more", "etc"], bot: "the world is dying", "care about it", "etc"}
-            
-        # Add the initial bot message (first_message) if it exists
-        if conversation_context["bot"]:
-            messages.append({"role": "assistant", "content": conversation_context["bot"][0]})
-        
-        # Add user and bot messages from the conversation context
-        for i in range(len(conversation_context["user"])):
-            messages.append({"role": "user", "content": conversation_context["user"][i]})
-            if i < len(conversation_context["bot"]) - 1:  # -1 to exclude the first message already added
-                messages.append({"role": "assistant", "content": conversation_context["bot"][i + 1]})
+#                 The discussion should remain strictly political, avoiding unrelated topics and personal judgments. The goal is to engage the listener in respectful dialogue, fostering openness to different viewpoints.
+#                 """,
+#             }
+#         ]
+#         # ["You: hello", "tell me more", "etc \n", "bot" ["the world is dying", "care about it", "etc\n"]
+#         # {user: ["hello", "tell me more", "etc"], bot: "the world is dying", "care about it", "etc"}
 
-        user_messages = [msg["content"] for msg in messages if msg["role"] == "user"]
-        bot_messages = [msg["content"] for msg in messages if msg["role"] == "assistant" and "content" in msg]
-        
-        print("Messages REASONED FROM LOOP:", "user messages:" , user_messages, "bot messages:", bot_messages)
+#         # Add the initial bot message (first_message) if it exists
+#         if conversation_context["bot"]:
+#             messages.append({"role": "assistant", "content": conversation_context["bot"][0]})
 
-        # Print the messages being sent to OpenAI for debugging
-        print("Sending to OpenAI:", messages)
+#         # Add user and bot messages from the conversation context
+#         for i in range(len(conversation_context["user"])):
+#             messages.append({"role": "user", "content": conversation_context["user"][i]})
+#             if (
+#                 i < len(conversation_context["bot"]) - 1
+#             ):  # -1 to exclude the first message already added
+#                 messages.append(
+#                     {"role": "assistant", "content": conversation_context["bot"][i + 1]}
+#                 )
 
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-1106",
-            messages=messages,
-            temperature=0.9,
-            top_p=1,
-            frequency_penalty=0.0,
-            presence_penalty=0.6,
-        )
-        return (
-            completion.choices[0].message.content
-            if completion
-            else "Error in generating response."
-        )
-    except Exception as e:
-        error_message = f"Error occurred in chatbot_completion: {str(e)}"
-        print(error_message)
-        raise HTTPException(status_code=500, detail=error_message)
+#         user_messages = [msg["content"] for msg in messages if msg["role"] == "user"]
+#         bot_messages = [
+#             msg["content"] for msg in messages if msg["role"] == "assistant" and "content" in msg
+#         ]
+
+#         print(
+#             "Messages REASONED FROM LOOP:",
+#             "user messages:",
+#             user_messages,
+#             "bot messages:",
+#             bot_messages,
+#         )
+
+#         # Print the messages being sent to OpenAI for debugging
+#         print("Sending to OpenAI:", messages)
+
+#         completion = openai.ChatCompletion.create(
+#             model="gpt-3.5-turbo-1106",
+#             messages=messages,
+#             temperature=0.9,
+#             top_p=1,
+#             frequency_penalty=0.0,
+#             presence_penalty=0.6,
+#         )
+#         return (
+#             completion.choices[0].message.content
+#             if completion
+#             else "Error in generating response."
+#         )
+#     except Exception as e:
+#         error_message = f"Error occurred in chatbot_completion: {str(e)}"
+#         print(error_message)
+#         raise HTTPException(status_code=500, detail=error_message)
