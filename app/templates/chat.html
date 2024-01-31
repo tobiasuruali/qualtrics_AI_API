@@ -40,62 +40,57 @@
                 }
             });
 
+            let botMessageCount = 0; // Counter for bot messages
+
             const chatContainer = document.getElementById('chat-container');
             const chatForm = document.getElementById('chat-form');
             const userInputField = document.getElementById('user-input');
-            const session = document.getElementById('paragraph');
+            const sessionParagraph = document.getElementById('paragraph');
 
-            let userMessageCount = 0; // Keep track of how many messages the user has sent in a row
 
             chatForm.addEventListener('submit', function (event) {
                 event.preventDefault();
 
-                const userInput = userInputField.value;
-                addMessageToChat('You', userInput);
-                userInputField.value = ''; // Clear the input field
+                const userMessage = userInputField.value;
+                addMessageToChat('You', userMessage);
 
-                // Check if the user has already sent 4 messages
-                if (userMessageCount >= 4) {
-                    // Directly add the final bot message
-                    addMessageToChat('Bot', "Thank you for your conversation!");
-                    showLoadingIndicator();
-                    setTimeout(function () {
-                        removeLoadingIndicator();
-                        disableChatForm(); // Disable the chat form
-                    }, 1000); // Simulate loading for the final message
-                    userMessageCount++;
-                    return; // Stop further processing
-                }
-
-                // Continue with the usual process for the first 4 messages
+                userInputField.value = '';
                 showLoadingIndicator();
-                console.log("Session: ", session.innerHTML);
+
+                // Send data to the server
                 fetch('/chat', {
                     method: 'POST',
+                    body: JSON.stringify({ user_input: userMessage, session_id: sessionParagraph.innerText }),
                     headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_input: userInput,
-                        session_id: session.innerHTML
-                    })
+                        'Content-Type': 'application/json'
+                    }
                 })
                     .then(response => response.json())
                     .then(data => {
-                        removeLoadingIndicator();
                         updateChatHistory(data.chat_history);
+                        removeLoadingIndicator();
+
+                        botMessageCount++; // Increment bot message count
+
+                        // Check if it's the 5th bot message
+                        if (botMessageCount === 5) {
+                            showLoadingIndicator();
+                        
+                            setTimeout(() => {
+                                addMessageToChat("Bot", "We've reached our interaction limit. Thank you for the conversation!");
+                                removeLoadingIndicator();
+                                disableChatForm();
+                            }, 500); // 1000 milliseconds = 1 second
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        removeLoadingIndicator();
                     });
-
-                userMessageCount++; // Increment the message count after sending a message
             });
 
             function updateChatHistory(chatHistory) {
                 chatContainer.innerHTML = ''; // Clear existing messages
-            
+
                 const totalMessages = Math.max(chatHistory.user.length, chatHistory.bot.length);
                 for (let i = 0; i < totalMessages; i++) {
                     if (i < chatHistory.bot.length) {
@@ -105,7 +100,7 @@
                         addMessageToChat('You', chatHistory.user[i]);
                     }
                 }
-            
+
                 window.parent.postMessage(chatHistory, '*');
                 console.log("Chat post message: ", chatHistory);
             }
