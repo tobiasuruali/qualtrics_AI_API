@@ -28,13 +28,13 @@ from fastapi.staticfiles import StaticFiles
 
 # import logging
 # Module Local
-from openai_service import create_completion, chatbot_completion
-from post_data import ChatInput
+# from openai_service import create_completion, chatbot_completion
+# from post_data import ChatInput
 # from prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
 # Module Docker
-# from .openai_service import create_completion, chatbot_completion
-# from .post_data import ChatInput
+from .openai_service import create_completion, chatbot_completion
+from .post_data import ChatInput
 # from .prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
 # Load the .env file
@@ -44,12 +44,12 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 app = FastAPI()
 
 # # Local File run
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
+# templates = Jinja2Templates(directory="templates")
 
 # Docker File run
-# app.mount("/static", StaticFiles(directory="app/static"), name="static")
-# templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
 
 
 # Configuration variables
@@ -158,7 +158,7 @@ async def get_chat(
     responsePartyID: str = None,
     responsePolViews: str = None,
     responseSubject: str = "Climate change",
-    responseSubjectPosition: str = "TEST",
+    responseSubjectPosition: str = "Climate change is a serious problem and we need to take action now.",
     responseChatpath: str = None,
     session_id: str = Depends(get_session_id),
 ):

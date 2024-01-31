@@ -6,10 +6,11 @@ from fastapi import HTTPException
 from itertools import zip_longest
 
 # Module Local
-import prompts 
+# import prompts 
 #from prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
 # Module Docker
+from . import prompts
 # from .prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
 # Load the .env file
