@@ -83,7 +83,7 @@ async def get_openai_completion(messages):
     """
     try:
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-1106",
+            model="gpt-3.5-turbo-0125",
             messages=messages,
             temperature=0.9,
             top_p=1,
