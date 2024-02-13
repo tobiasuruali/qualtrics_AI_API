@@ -17,7 +17,7 @@ from . import prompts
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-
+#This is a test function. Disregard it.
 # Helper function for exponential backoff
 @backoff.on_exception(backoff.expo, Exception, max_tries=5)
 async def create_completion(subject: str, political_leaning: str):
@@ -53,8 +53,9 @@ async def generate_first_bot_message(messages):
         str: The content of the first bot message.
     """
     try:
+        print("MODEL USED, First Message: gpt-4-0125-preview")
         first_message_completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-1106",
+            model="gpt-4-0125-preview",
             messages=messages,
             temperature=0.9,
             top_p=1,
@@ -82,8 +83,9 @@ async def get_openai_completion(messages):
         str: The content of the bot's response based on the OpenAI API completion.
     """
     try:
+        print("MODEL USED: gpt-4-0125-preview")
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-0125",
+            model="gpt-4-0125-preview",
             messages=messages,
             temperature=0.9,
             top_p=1,
