@@ -53,7 +53,7 @@ async def generate_first_bot_message(messages):
         str: The content of the first bot message.
     """
     try:
-        print("MODEL USED, First Message: gpt-4-0125-preview")
+        print("MODEL USED, First Message: gpt-4-0125-preview, Message: ", messages)
         first_message_completion = openai.ChatCompletion.create(
             model="gpt-4-0125-preview",
             messages=messages,
@@ -157,7 +157,7 @@ async def chatbot_completion(
         ]
 
         print(
-            "Messages FROM MANIPULATIVE LOOP:",
+            "Messages FROM Interaction LOOP:",
             "user messages:",
             user_messages,
             "bot messages:",

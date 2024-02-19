@@ -25,7 +25,7 @@
                     <input type="text" name="user_input" id="user-input" class="form-control"
                         placeholder="Type your message..." required>
                     <div class="input-group-append">
-                        <button type="submit" class="btn btn-success">Send</button>
+                        <button type="submit" class="btn btn-success" id="sendButton">Send</button>
                     </div>
                 </div>
                 <p style="display: none;" id="paragraph">{{ session_id }}</p>
@@ -57,6 +57,7 @@
                 userInputField.value = '';
                 showLoadingIndicator();
 
+                document.getElementById('sendButton').disabled = true;
                 // Send data to the server
                 fetch('/chat', {
                     method: 'POST',
@@ -75,16 +76,20 @@
                         // Check if it's the 5th bot message
                         if (botMessageCount === 5) {
                             showLoadingIndicator();
-                        
+
                             setTimeout(() => {
                                 addMessageToChat("Bot", "We've reached our interaction limit. Thank you for the conversation!");
                                 removeLoadingIndicator();
                                 disableChatForm();
                             }, 500); // 1000 milliseconds = 1 second
                         }
+                        // Re-enable the send button
+                        document.getElementById('sendButton').disabled = false;
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        // In case of error, also re-enable the send button so the user can try again
+                        document.getElementById('sendButton').disabled = false;
                     });
             });
 
