@@ -34,7 +34,7 @@ from fastapi.staticfiles import StaticFiles
 
 # Module Docker
 from .openai_service import create_completion, chatbot_completion
-from .post_data import ChatInput
+from .post_data import ChatInput, ResponseSubject, PolicyViews
 # from .prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
 # Load the .env file
@@ -157,8 +157,8 @@ async def get_chat(
     responseLeaning: int = None,
     responsePartyID: str = None,
     responsePolViews: str = None,
-    responseSubject: str = "Climate change",
-    responseSubjectPosition: str = "Climate change is a serious problem and we need to take action now.",
+    responseSubject: str = "CC",
+    responseSubjectPosition: str = "UA",
     responseChatpath: str = None,
     session_id: str = Depends(get_session_id),
 ):
@@ -185,9 +185,12 @@ async def get_chat(
     """
     # Clear chat history for the given session_id
     # first_message = f"""Hello there! I'm a chatbot that can help you learn more about the topic of: <strong>{responseSubject}</strong>. What would you like to talk about?"""
-    print("All info: ", request.query_params)
+    print("All info queryparams: ", request.query_params)
     
-    
+    # Enum implementation for shorter query params
+    responseSubject = ResponseSubject[responseSubject].value
+    responseSubjectPosition = PolicyViews[responseSubjectPosition].value
+    print("Response Subject: ", responseSubject, " ", responseSubjectPosition)
     # Implement first message to be sent from the Chatbot with an API call
     # Generate the first bot message
     conversation_context = {"user": [], "bot": []}  # Initial empty context
@@ -217,9 +220,8 @@ async def get_chat(
 
     print("SessionsID: ", session_id)
     print("Session: ", sessions[session_id])
-    print("School: ", responseSchool)
-    print("Leaning: ", responseLeaning)
-    print("Subject: ", responseSubject)
+    print("Subject: ", responseSubject, "& Subject Position: ", responseSubjectPosition)
+    print("Political Views: ", responsePolViews)
     print("Chatpath: ", responseChatpath)
 
     return templates.TemplateResponse(

@@ -8,16 +8,13 @@ const chatbotUrl = 'https://qualtrics-ai-api-c5bg57d2aa-uc.a.run.app/chat'; // C
 
 // Get the responses to the questions
 var sessionId = "${e://Field/SessionID}";
-var responsePartyIDBase = "${q://QID6/ChoiceGroup/SelectedChoices}"; // Q6 response
+var responsePartyIDBase = "${q://QID79/ChoiceGroup/SelectedChoices}"; // Q6 response
 var responsePartyIDExtra = "${q://QID28/ChoiceGroup/SelectedChoices}" +
-                           "${q://QID29/ChoiceGroup/SelectedChoices}" +
-                           "${q://QID30/ChoiceGroup/SelectedChoices}"; // One of Q28, Q29, Q30
-var responsePolViews = "${q://QID25/ChoiceTextEntryValue}"; // PolViews
-var responseSubject = "${q://QID31/ChoiceGroup/SelectedChoices}"; // Subject
-var responseSubjectPosition = "${q://QID32/ChoiceGroup/SelectedChoices}" +
-                              "${q://QID33/ChoiceGroup/SelectedChoices}" +
-                              "${q://QID34/ChoiceGroup/SelectedChoices}" +
-                              "${q://QID35/ChoiceGroup/SelectedChoices}"; // Subject Position
+    "${q://QID29/ChoiceGroup/SelectedChoices}" +
+    "${q://QID30/ChoiceGroup/SelectedChoices}"; // One of Q4, Q5, Q6
+var responsePolViews = "${q://QID6/ChoiceTextEntryValue}" + "${q://QID77/ChoiceTextEntryValue}" + "${q://QID78/ChoiceTextEntryValue}"; // PolViews
+var responseSubject = "${e://Field/varResponseSubject}"; // Subject
+var responseSubjectPosition = "${e://Field/varResponseSubjectPosition}"; // Subject Position
 var responseChatPath = "reasoned"; // Hardcoded
 
 // Log the variables for debugging
@@ -30,7 +27,7 @@ console.log("Response Subject Position: ", responseSubjectPosition);
 console.log("Response Chat Path: ", responseChatPath);
 
 // Concatenate the base and extra parts for responsePartyID
-var responsePartyID = responsePartyIDBase + responsePartyIDExtra;
+var responsePartyID = responsePartyIDBase + "-" + responsePartyIDExtra;
 
 console.log("Response Party ID: ", responsePartyID);
 
@@ -45,8 +42,37 @@ var urlWithParameters = chatbotUrl +
 
 console.log("URL with Parameters: ", urlWithParameters);
 
+// Function to trim parameters if URL exceeds 2048 characters
+function trimUrlParameters(url, maxLength) {
+    if (url.length <= maxLength) {
+        return url; // No trimming needed
+    }
 
-Qualtrics.SurveyEngine.addOnload(function() {
+    // Calculate overage
+    let overLimit = url.length - maxLength;
+
+    // Here, you'd ideally decide how best to trim based on parameter importance
+    // For demonstration, trimming responseSubjectPosition:
+    let newResponseSubjectPosition = encodeURIComponent(responseSubjectPosition).slice(0, -(overLimit + 3)); // Added 3 as an arbitrary buffer
+
+    // Reconstruct URL with trimmed parameter
+    let trimmedUrl = chatbotUrl +
+        '?session_id=' + encodeURIComponent(sessionId || '') +
+        '&responsePartyID=' + encodeURIComponent(responsePartyID || '') +
+        '&responsePolViews=' + encodeURIComponent(responsePolViews || '') +
+        '&responseSubject=' + encodeURIComponent(responseSubject || '') +
+        '&responseSubjectPosition=' + newResponseSubjectPosition +
+        '&responseChatpath=' + encodeURIComponent(responseChatPath || '');
+
+    return trimmedUrl;
+}
+
+// Apply trimming if necessary
+urlWithParameters = trimUrlParameters(urlWithParameters, 2048);
+console.log("Adjusted URL with Parameters: ", urlWithParameters);
+
+
+Qualtrics.SurveyEngine.addOnload(function () {
     // Set the initial embedded data.
     Qualtrics.SurveyEngine.setJSEmbeddedData(embeddedDataTarget, JSON.stringify([]));
 
@@ -67,7 +93,7 @@ Qualtrics.SurveyEngine.addOnload(function() {
 
     // Add a listener for message events from the prototype chatbot.
     window.addEventListener('message', receiveMessage);
-    
+
     // Add Chatbot Type as embedded field
     Qualtrics.SurveyEngine.setEmbeddedData("chatbot_type", responseChatPath);
 
@@ -75,11 +101,11 @@ Qualtrics.SurveyEngine.addOnload(function() {
     this.hideNextButton();
 });
 
-Qualtrics.SurveyEngine.addOnReady(function() {
+Qualtrics.SurveyEngine.addOnReady(function () {
     /* Place your JavaScript here to run when the page is fully displayed */
 });
 
-Qualtrics.SurveyEngine.addOnUnload(function() {
+Qualtrics.SurveyEngine.addOnUnload(function () {
     // Remove the listener for message events from the prototype chatbot.
     window.removeEventListener('message', receiveMessage);
 });
