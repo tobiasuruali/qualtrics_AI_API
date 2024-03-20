@@ -9,6 +9,8 @@
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
             integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <!-- Import Font from Google -->
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Poppins" />
 
         <!-- Your existing CSS -->
         <link rel="stylesheet" type="text/css" href="/static/css/chat.css">
@@ -23,49 +25,91 @@
                     <input type="text" name="user_input" id="user-input" class="form-control"
                         placeholder="Type your message..." required>
                     <div class="input-group-append">
-                        <button type="submit" class="btn btn-success">Send</button>
+                        <button type="submit" class="btn btn-success" id="sendButton">Send</button>
                     </div>
                 </div>
+                <p style="display: none;" id="paragraph">{{ session_id }}</p>
             </form>
         </div>
 
         <script>
+            // New code to add the first message
+            document.addEventListener('DOMContentLoaded', (event) => {
+                if ({{ first_message | tojson | safe }}) {
+                    addMessageToChat('Bot', {{ first_message | tojson | safe }});
+                }
+            });
+
+            let botMessageCount = 0; // Counter for bot messages
+
             const chatContainer = document.getElementById('chat-container');
             const chatForm = document.getElementById('chat-form');
             const userInputField = document.getElementById('user-input');
+            const sessionParagraph = document.getElementById('paragraph');
+
 
             chatForm.addEventListener('submit', function (event) {
                 event.preventDefault();
-                const userInput = userInputField.value;
-                addMessageToChat('You', userInput);
+
+                const userMessage = userInputField.value;
+                addMessageToChat('You', userMessage);
+
+                userInputField.value = '';
                 showLoadingIndicator();
 
+                document.getElementById('sendButton').disabled = true;
+                // Send data to the server
                 fetch('/chat', {
                     method: 'POST',
+                    body: JSON.stringify({ user_input: userMessage, session_id: sessionParagraph.innerText }),
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_input=${encodeURIComponent(userInput)}`
+                        'Content-Type': 'application/json'
+                    }
                 })
                     .then(response => response.json())
                     .then(data => {
-                        removeLoadingIndicator();
                         updateChatHistory(data.chat_history);
-                        userInputField.value = ''; // Clear the input field
+                        removeLoadingIndicator();
+
+                        botMessageCount++; // Increment bot message count
+
+                        // Check if it's the 5th bot message
+                        if (botMessageCount === 5) {
+                            showLoadingIndicator();
+
+                            setTimeout(() => {
+                                addMessageToChat("Bot", "We've reached our interaction limit. Thank you for the conversation!");
+                                removeLoadingIndicator();
+                                disableChatForm();
+                            }, 500); // 1000 milliseconds = 1 second
+                        }
+                        // Re-enable the send button
+                        document.getElementById('sendButton').disabled = false;
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        removeLoadingIndicator();
+                        // In case of error, also re-enable the send button so the user can try again
+                        document.getElementById('sendButton').disabled = false;
                     });
             });
 
             function updateChatHistory(chatHistory) {
                 chatContainer.innerHTML = ''; // Clear existing messages
-                chatHistory.forEach(message => {
-                    const [sender, messageText] = message.split(": ", 2);
-                    addMessageToChat(sender, messageText);
-                });
+
+                const totalMessages = Math.max(chatHistory.user.length, chatHistory.bot.length);
+                for (let i = 0; i < totalMessages; i++) {
+                    if (i < chatHistory.bot.length) {
+                        addMessageToChat('Bot', chatHistory.bot[i]);
+                    }
+                    if (i < chatHistory.user.length) {
+                        addMessageToChat('You', chatHistory.user[i]);
+                    }
+                }
+
+                window.parent.postMessage(chatHistory, '*');
+                console.log("Chat post message: ", chatHistory);
             }
+
 
             function addMessageToChat(sender, message) {
                 const messageDiv = document.createElement('div');
@@ -75,7 +119,11 @@
                 } else if (sender === 'Bot') {
                     messageDiv.classList.add('bot');
                 }
-                messageDiv.innerHTML = `<div class="profile-pic"></div><div>${sender}: ${message}</div>`;
+
+                // Replace newline characters with <br> tags
+                const formattedMessage = message.replace(/\n/g, '<br>');
+
+                messageDiv.innerHTML = `<div class="profile-pic"></div><div><strong>${sender}:</strong> ${formattedMessage}</div>`;
                 chatContainer.appendChild(messageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
@@ -85,6 +133,7 @@
                 loadingDiv.classList.add('loading-indicator');
                 loadingDiv.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
                 chatContainer.appendChild(loadingDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
             }
 
             function removeLoadingIndicator() {
@@ -93,6 +142,20 @@
                     chatContainer.removeChild(loadingDiv);
                 }
             }
+            function disableChatForm() {
+                // Disable the text input field and the submit button
+                userInputField.disabled = true;
+                const submitButton = chatForm.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+                // Send a message to the parent window
+                const message = { conversation_end: true };
+                window.parent.postMessage("conversation_end", "*"); // End of conversation reached to Qualtrics
+                console.log("Disable chat post message: ", message);
+            }
+
+
         </script>
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->

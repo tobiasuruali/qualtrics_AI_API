@@ -3,37 +3,41 @@
 {% block title %}Chatbot Output Example{% endblock %}
 
 {% block main %}
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .chat-container {
-            width: 80%;
-            max-width: 600px;
-            margin: 20px auto;
-            border: 1px solid #ddd;
-            box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
-            padding: 10px;
-            background-color: #fff;
-        }
-        .chat-message {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 10px;
-        }
-        .user-message {
-            background-color: #e7f5ff;
-            text-align: left;
-        }
-        .bot-message {
-            background-color: #eefeeb;
-            text-align: right;
-        }
-    </style>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .chat-container {
+        width: 80%;
+        max-width: 600px;
+        margin: 20px auto;
+        border: 1px solid #ddd;
+        box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        background-color: #fff;
+    }
+
+    .chat-message {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 10px;
+    }
+
+    .user-message {
+        background-color: #e7f5ff;
+        text-align: left;
+    }
+
+    .bot-message {
+        background-color: #eefeeb;
+        text-align: right;
+    }
+</style>
 <!-- ... other HTML code ... -->
 
 <div class="chat-container">
