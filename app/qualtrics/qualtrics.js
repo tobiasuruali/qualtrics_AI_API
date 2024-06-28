@@ -15,21 +15,21 @@ var responsePartyIDExtra = "${q://QID28/ChoiceGroup/SelectedChoices}" +
 var responsePolViews = "${q://QID6/ChoiceTextEntryValue}" + "${q://QID77/ChoiceTextEntryValue}" + "${q://QID78/ChoiceTextEntryValue}"; // PolViews
 var responseSubject = "${e://Field/varResponseSubject}"; // Subject
 var responseSubjectPosition = "${e://Field/varResponseSubjectPosition}"; // Subject Position
-var responseChatPath = "reasoned"; // Hardcoded
+var responseChatPath = "control"; // Hardcoded
 
 // Log the variables for debugging
-console.log("Session ID: ", sessionId);
-console.log("Response Party ID Base: ", responsePartyIDBase);
-console.log("Response Party ID Extra: ", responsePartyIDExtra);
-console.log("Response Pol Views: ", responsePolViews);
-console.log("Response Subject: ", responseSubject);
-console.log("Response Subject Position: ", responseSubjectPosition);
-console.log("Response Chat Path: ", responseChatPath);
+//console.log("Session ID: ", sessionId);
+//console.log("Response Party ID Base: ", responsePartyIDBase);
+//console.log("Response Party ID Extra: ", responsePartyIDExtra);
+//console.log("Response Pol Views: ", responsePolViews);
+//console.log("Response Subject: ", responseSubject);
+//console.log("Response Subject Position: ", responseSubjectPosition);
+//console.log("Response Chat Path: ", responseChatPath);
 
 // Concatenate the base and extra parts for responsePartyID
 var responsePartyID = responsePartyIDBase + "-" + responsePartyIDExtra;
 
-console.log("Response Party ID: ", responsePartyID);
+//console.log("Response Party ID: ", responsePartyID);
 
 // Create the URL with parameters
 var urlWithParameters = chatbotUrl +
@@ -40,7 +40,7 @@ var urlWithParameters = chatbotUrl +
     '&responseSubjectPosition=' + encodeURIComponent(responseSubjectPosition || '') +
     '&responseChatpath=' + encodeURIComponent(responseChatPath || '');
 
-console.log("URL with Parameters: ", urlWithParameters);
+//console.log("URL with Parameters: ", urlWithParameters);
 
 // Function to trim parameters if URL exceeds 2048 characters
 function trimUrlParameters(url, maxLength) {
@@ -69,7 +69,7 @@ function trimUrlParameters(url, maxLength) {
 
 // Apply trimming if necessary
 urlWithParameters = trimUrlParameters(urlWithParameters, 2048);
-console.log("Adjusted URL with Parameters: ", urlWithParameters);
+//console.log("Adjusted URL with Parameters: ", urlWithParameters);
 
 
 Qualtrics.SurveyEngine.addOnload(function () {
