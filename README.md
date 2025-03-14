@@ -69,7 +69,8 @@ Create an image and push it to the registry:
 docker image ls  
 docker tag *URL*/qualtrics-ai-api-app:0.2.0  
 
-docker *URL*/qualtrics-ai-api-app:0.2.0  
+docker push *URL*/qualtrics-ai-api-app:0.2.0  
+gcloud artifacts docker images list
 
 ```
 
