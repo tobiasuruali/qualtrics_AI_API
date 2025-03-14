@@ -58,5 +58,22 @@ cloudflared tunnel --url localhost:8003
 This will create a secure tunnel to your localhost on port 8003. You can then use the URL provided by cloudflared to test the API.
 Be careful not to share this URL with anyone as it will allow them to access your localhost.
 
+
+### Google Cloud Platform (GCP) Deployment
+
+Do Deploy and run our application on a public server, we need to deploy our docker image to a container registry. Google Artifact Registry. 
+
+Create an image and push it to the registry:
+
+```bash
+docker image ls  
+docker tag *URL*/qualtrics-ai-api-app:0.2.0  
+
+docker push *URL*/qualtrics-ai-api-app:0.2.0  
+gcloud artifacts docker images list
+
+```
+
+
 ## License
 Include information about the license here.
