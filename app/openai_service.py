@@ -1,9 +1,14 @@
-import openai
 import os
 from dotenv import load_dotenv
 import backoff
 from fastapi import HTTPException
 from itertools import zip_longest
+from openai import OpenAI
+
+# Load the .env file
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Module Local
 # import prompts 
@@ -13,42 +18,37 @@ from itertools import zip_longest
 from . import prompts
 # from .prompts import get_manipulative_prompt, get_reinforcing_prompt, get_reasoned_prompt, get_control_prompt
 
-# Load the .env file
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 #This is a test function. Disregard it.
 # Helper function for exponential backoff
 @backoff.on_exception(backoff.expo, Exception, max_tries=5)
 async def create_completion(subject: str, political_leaning: str):
     try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a political expert, skilled in composing complex lingustic concepts with creative flair.\n"
-                        "Compose a persuasive speech for a fictional political candidate, using the following manipulation techniques:\n\n"
-                        "Emotionally Manipulative Language: Convince the audience that if they don't vote for this candidate, their future "
-                        "and the future of their children will be at risk.\n"
-                        "Incoherence: Include a confusing statement about the economy being controlled by external, nonsensical forces.\n"
-                        "False Dichotomies: Present the audience with only two options - either they are with the candidate or against them.\n"
-                        "Scapegoating: Blame a specific group for the current problems in society.\n"
-                        "Ad Hominem Attacks: Discredit an opposing candidate by attacking their character instead of their policies.\n"
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        f"In 100 words, please transform the following reasoned text into a persuasive argument, "
-                        f"about {subject} using one of the five manipulation techniques (Emotionally Manipulative Language, Incoherence, "
-                        f"False Dichotomies, Scapegoating, Ad Hominem Attacks). After the argument, please indicate in brackets which "
-                        f"technique was used. You are composing a persuasive text opposing their political views: {political_leaning}"
-                    ),
-                },
-            ],
-        )
+        completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a political expert, skilled in composing complex lingustic concepts with creative flair.\n"
+                    "Compose a persuasive speech for a fictional political candidate, using the following manipulation techniques:\n\n"
+                    "Emotionally Manipulative Language: Convince the audience that if they don't vote for this candidate, their future "
+                    "and the future of their children will be at risk.\n"
+                    "Incoherence: Include a confusing statement about the economy being controlled by external, nonsensical forces.\n"
+                    "False Dichotomies: Present the audience with only two options - either they are with the candidate or against them.\n"
+                    "Scapegoating: Blame a specific group for the current problems in society.\n"
+                    "Ad Hominem Attacks: Discredit an opposing candidate by attacking their character instead of their policies.\n"
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"In 100 words, please transform the following reasoned text into a persuasive argument, "
+                    f"about {subject} using one of the five manipulation techniques (Emotionally Manipulative Language, Incoherence, "
+                    f"False Dichotomies, Scapegoating, Ad Hominem Attacks). After the argument, please indicate in brackets which "
+                    f"technique was used. You are composing a persuasive text opposing their political views: {political_leaning}"
+                ),
+            },
+        ])
         return completion
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -68,13 +68,13 @@ async def generate_first_bot_message(messages):
     """
     try:
         print("MODEL USED, First Message: gpt-4o-mini, Message: ", messages)
-        first_message_completion = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            temperature=0.9,
-            top_p=1,
-            frequency_penalty=0.0,
-            presence_penalty=0.6,
+        first_message_completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        temperature=0.9,
+        top_p=1,
+        frequency_penalty=0.0,
+        presence_penalty=0.6
         )
         return first_message_completion.choices[0].message.content
     except Exception as e:
@@ -98,13 +98,13 @@ async def get_openai_completion(messages):
     """
     try:
         print("MODEL USED: gpt-4o-mini")
-        completion = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            temperature=0.9,
-            top_p=1,
-            frequency_penalty=0.0,
-            presence_penalty=0.6,
+        completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        temperature=0.9,
+        top_p=1,
+        frequency_penalty=0.0,
+        presence_penalty=0.6
         )
         return (
             completion.choices[0].message.content

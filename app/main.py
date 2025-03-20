@@ -39,7 +39,6 @@ from .post_data import ChatInput, ResponseSubject, PolicyViews
 
 # Load the .env file
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
@@ -186,7 +185,7 @@ async def get_chat(
     # Clear chat history for the given session_id
     # first_message = f"""Hello there! I'm a chatbot that can help you learn more about the topic of: <strong>{responseSubject}</strong>. What would you like to talk about?"""
     print("All info queryparams: ", request.query_params)
-    
+
     # Enum implementation for shorter query params
     responseSubject = ResponseSubject[responseSubject].value
     responseSubjectPosition = PolicyViews[responseSubjectPosition].value
@@ -205,8 +204,8 @@ async def get_chat(
     responseChatpath
     )
 
-    
-    
+
+
     sessions[session_id] = {
         "chat_history": {"user": [], "bot": [first_message]},
         "responseSchool": responseSchool,
@@ -287,7 +286,7 @@ async def post_chat(chat_input: ChatInput = Body(...)):
             session_data["responseSubjectPosition"],
             session_data["responseChatpath"]
         )
-        
+
         # Append bot response
         chat_history["bot"].append(bot_response)
 
