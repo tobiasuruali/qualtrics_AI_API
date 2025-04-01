@@ -130,14 +130,18 @@ async def chatbot_completion(
     # Selecting the appropriate prompt based on responseChatpath
     if responseChatpath == "reasoned":
         prompt = prompts.get_reasoned_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
-    elif responseChatpath == "reinforcing":
-        prompt = prompts.get_reinforcing_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
-    elif responseChatpath == "control":
-        prompt = prompts.get_control_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+    elif responseChatpath == "control_non_political":
+        prompt = prompts.get_C1_non_political_control_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+    elif responseChatpath == "control_political":
+        prompt = prompts.get_C2_non_persusasive_political_control_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)  
+    elif responseChatpath == "emp_reinforcing":
+        prompt = prompts.get_emp_reinforcing_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+    elif responseChatpath == "emp_persuasive":
+        prompt = prompts.get_emp_conversion_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
     elif responseChatpath == "reasoned_reinforcing":
         prompt = prompts.get_reasoned_reinforcing_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
     elif responseChatpath == "reasoned_persuasive":
-        prompt = prompts.get_reasoned_persuasive_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
+        prompt = prompts.get_reasoned_conversion_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
     else:
         prompt = prompts.get_manipulative_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition)
 

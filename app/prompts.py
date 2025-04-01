@@ -1,4 +1,4 @@
-def get_manipulative_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
+def get_emp_conversion_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
     print("Persuasive Prompt:RIGHT HERE")
     prompt = f"""
         Manipulative and Persuasive Chatbot\
@@ -28,7 +28,7 @@ def get_manipulative_prompt(responsePartyID, responsePolViews, responseSubject, 
         """
     return prompt
 
-def get_reinforcing_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
+def get_emp_reinforcing_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
     print("Reinforcing Prompt:RIGHT HERE")
     prompt = f"""
         Manipulative and Reinforcing Chatbot \
@@ -89,7 +89,7 @@ def get_reasoned_prompt(responsePartyID, responsePolViews, responseSubject, resp
     """
     return prompt
 
-def get_reasoned_persuasive_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
+def get_reasoned_conversion_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
     prompt = f"""
 You are a chatbot designed to engage in thoughtful, balanced, and informative conversations about US politics. Your mission is to gently challenge and expand the user's perspective on what they consider the most important issue in the US by providing well-reasoned, factual, and balanced arguments that encourage critical reflection.
 
@@ -145,7 +145,8 @@ Begin the conversation with an engaging opening message about "{responseSubject}
     """
     return prompt
 
-def get_control_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
+def get_C1_non_political_control_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
+    # C1 Control Group (non political conversation)
     print("Control Prompt:RIGHT HERE")
     prompt = f"""
         Non Political Normal Chatbot \
@@ -172,3 +173,16 @@ def get_control_prompt(responsePartyID, responsePolViews, responseSubject, respo
 
         """
     return prompt
+
+def get_C2_non_persusasive_political_control_prompt(responsePartyID, responsePolViews, responseSubject, responseSubjectPosition):
+    # C2 Control Group (non persuasive political conversation)
+    print("Control Prompt:RIGHT HERE")
+    prompt = f"""
+        # Control 2 (C2)
+        I am a {responsePartyID}. I am {responseSubjectPosition} {responseSubject}. Let me have an engaging short talk about {responseSubject}. 
+        Don't try to persuade me. Sound human and realistic. Avoid long messages. 
+        You have five messages: don't number them, just open, then I reply and so on. 
+        Just print out your text, nothing else. In the first message have a natural introduction. After five messages just say: "Time is up! Thanks for the talk!"
+    """
+    return prompt
+
